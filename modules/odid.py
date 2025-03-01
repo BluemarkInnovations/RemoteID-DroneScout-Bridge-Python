@@ -15,47 +15,48 @@ class ODID_MESSAGETYPE(Enum):
 
 ODID_ID_SIZE = 20
 ODID_STR_SIZE = 23
+ODID_MESSAGE_SIZE = 25
 
 def print_message_pack(payload, size):
 
 	for x in range(size):
-		RIDtype = payload[x*25] >> 4
-		ProtoVersion = payload[x*25] & 0x0F
+		RIDtype = payload[x*ODID_MESSAGE_SIZE] >> 4
+		ProtoVersion = payload[x*ODID_MESSAGE_SIZE] & 0x0F
 		if (ODID_MESSAGETYPE(RIDtype) == ODID_MESSAGETYPE.ODID_MESSAGETYPE_BASIC_ID):
 			print("\n===BasicID===")
 			print("RIDtype: %i" % RIDtype)
 			print("ProtoVersion: %i" % ProtoVersion)
-			print_basicID(payload[x*25:x*25 + 25]) #each message is 25 bytes
+			print_basicID(payload[x*ODID_MESSAGE_SIZE:x*ODID_MESSAGE_SIZE + ODID_MESSAGE_SIZE])
 
 		if (ODID_MESSAGETYPE(RIDtype) == ODID_MESSAGETYPE.ODID_MESSAGETYPE_LOCATION):
 			print("\n===Location===")
 			print("RIDtype: %i" % RIDtype)
 			print("ProtoVersion: %i" % ProtoVersion)
-			print_location(payload[x*25:x*25 + 25]) #each message is 25 bytes
+			print_location(payload[x*ODID_MESSAGE_SIZE:x*ODID_MESSAGE_SIZE + ODID_MESSAGE_SIZE])
 
 		if (ODID_MESSAGETYPE(RIDtype) == ODID_MESSAGETYPE.ODID_MESSAGETYPE_AUTH):
 			print("\n===Auth===")
 			print("RIDtype: %i" % RIDtype)
 			print("ProtoVersion: %i" % ProtoVersion)
-			print_auth(payload[x*25:x*25 + 25]) #each message is 25 bytes
+			print_auth(payload[x*ODID_MESSAGE_SIZE:x*ODID_MESSAGE_SIZE + ODID_MESSAGE_SIZE])
 
 		if (ODID_MESSAGETYPE(RIDtype) == ODID_MESSAGETYPE.ODID_MESSAGETYPE_SELF_ID):
 			print("\n===SelfID===")
 			print("RIDtype: %i" % RIDtype)
 			print("ProtoVersion: %i" % ProtoVersion)
-			print_selfID(payload[x*25:x*25 + 25]) #each message is 25 bytes
+			print_selfID(payload[x*ODID_MESSAGE_SIZE:x*ODID_MESSAGE_SIZE + ODID_MESSAGE_SIZE])
 
 		if (ODID_MESSAGETYPE(RIDtype) == ODID_MESSAGETYPE.ODID_MESSAGETYPE_SYSTEM):
 			print("\n===System===")
 			print("RIDtype: %i" % RIDtype)
 			print("ProtoVersion: %i" % ProtoVersion)
-			print_system(payload[x*25:x*25 + 25]) #each message is 25 bytes
+			print_system(payload[x*ODID_MESSAGE_SIZE:x*ODID_MESSAGE_SIZE + ODID_MESSAGE_SIZE])
 
 		if (ODID_MESSAGETYPE(RIDtype) == ODID_MESSAGETYPE.ODID_MESSAGETYPE_OPERATOR_ID):
 			print("\n===OperatorID===")
 			print("RIDtype: %i" % RIDtype)
 			print("ProtoVersion: %i" % ProtoVersion)
-			print_operatorID(payload[x*25:x*25 + 25]) #each message is 25 bytes
+			print_operatorID(payload[x*ODID_MESSAGE_SIZE:x*ODID_MESSAGE_SIZE + ODID_MESSAGE_SIZE])
 
 def print_basicID(payload):
 	IDType = payload[1] >> 4

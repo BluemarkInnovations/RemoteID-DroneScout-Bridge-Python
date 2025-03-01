@@ -10,10 +10,13 @@ import config # config.py with settings
 
 from modules import odid # opendroneID functions
 from modules import adsb # ADSB vehicle functions
+from modules import log_file # log opendroneID data to a CSV file
 
 #setup MAVLink serial link and wait until a heartbeat is received
 master = mavutil.mavlink_connection(config.interface, config.baudrate)
 master.wait_heartbeat()
+
+
 
 while True:
     try:
@@ -39,3 +42,8 @@ while True:
         print("\n%s MAVLink OpenDroneID Message Pack message received" % current_time)
         #print("\n%s" % msg.to_dict()) #print raw packet contents
         odid.print_message_pack(msg.messages, msg.msg_pack_size)
+        if hasattr(config, 'log_path'):
+            if 'filename' not in globals():
+                global filename
+                filename = log_file.open_csv(config.log_path)
+            log_file.write_csv(msg.messages, msg.msg_pack_size,filename)

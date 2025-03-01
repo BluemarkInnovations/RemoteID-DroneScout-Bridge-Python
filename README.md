@@ -28,7 +28,7 @@ DroneScout bridge has several use cases:
 <li><i>RemoteID receiver for your drone</i>: Install the DroneScout bridge on your drone and use it for DAA (Detect And Avoid) scenarios. The device allows outputting data using MAVLink ADS-B vehicle format on an UART interface.</li>
 <li><i>RemoteID receiver for your own application/product</i>: Connect the DroneScout Bridge to your processing platform (computer, Raspberry Pi etc). The device allows outputting data using MAVLink OpenDroneID format on an UART interface. Use this data to collect RemoteID data of nearby phones. DroneScout Bridge allows to connect multiple DroneScout Bridge devices by using the IN and OUT UART connectors.</li>
 </ul>
-\#RemoteID \#FAA \#F3411 \#DIN_EN_4709-002 \#dronetechnology \#DAA_DetectAndAvoid
+#RemoteID #FAA #F3411 #DIN_EN_4709-002 #dronetechnology #DAA_DetectAndAvoid
 
 
 

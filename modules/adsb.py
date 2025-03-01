@@ -1,5 +1,4 @@
-from bitstruct import *
-from enum import Enum
+# ADSB vehicle functions
 
 def print_payload(payload):
 	print("ADS-B vehicle")

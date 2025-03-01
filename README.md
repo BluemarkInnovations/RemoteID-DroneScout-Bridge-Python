@@ -3,7 +3,7 @@
 
 
 ## What is it?
-This repository contains Python reference code to display parse data of DroneScout Bridge receiver dongles (Technical: [MAVLink ADS-B vehicle](https://mavlink.io/en/messages/common.html#ADSB_VEHICLE) or [MAVLink OpenDroneID](https://mavlink.io/en/services/opendroneid.html) messages). It is a basic application that only displays the payload of these messages. A similar application written in C can be found here: [RemoteID-DroneScout-Bridge-C](https://github.com/BluemarkInnovations/RemoteID-DroneScout-Bridge-C)
+This repository contains Python reference code to display parse data of DroneScout Bridge receiver dongles (Technical: [MAVLink ADS-B vehicle](https://mavlink.io/en/messages/common.html#ADSB_VEHICLE) or [MAVLink OpenDroneID](https://mavlink.io/en/services/opendroneid.html) messages). It is a basic application that only displays the payload of these messages. It can also save detected signals to a CSV file. A similar application written in C can be found here: [RemoteID-DroneScout-Bridge-C](https://github.com/BluemarkInnovations/RemoteID-DroneScout-Bridge-C)
 
 
 
@@ -27,7 +27,7 @@ DroneScout bridge has several use cases:
 <li><i>wireless relay</i>: Most iOS and Android phones only receive RemoteID signals in Bluetooth legacy format. DroneScout Bridge can receive RemoteID signals (WLAN Beacon, Bluetooth Long Range) and wireless relay them in a format that your smartphone understands. You can keep using your favorite RemoteID app.</li>
 <li><i>RemoteID receiver for your drone</i>: Install the DroneScout bridge on your drone and use it for DAA (Detect And Avoid) scenarios. The device allows outputting data using MAVLink ADS-B vehicle format on an UART interface.</li>
 <li><i>RemoteID receiver for your own application/product</i>: Connect the DroneScout Bridge to your processing platform (computer, Raspberry Pi etc). The device allows outputting data using MAVLink OpenDroneID format on an UART interface. Use this data to collect RemoteID data of nearby phones. DroneScout Bridge allows to connect multiple DroneScout Bridge devices by using the IN and OUT UART connectors.</li>
-
+</ul>
 \#RemoteID \#FAA \#F3411 \#DIN_EN_4709-002 \#dronetechnology \#DAA_DetectAndAvoid
 
 
@@ -36,15 +36,14 @@ DroneScout bridge has several use cases:
 The code is Python3 code. It needs these dependencies (tested under Ubuntu):
 
 ```
-sudo pip3 install pymavlink
+sudo pip3 install pymavlink bitstruct
 ```
 
 
 
 ## Configuration
 
-In the config.py file, enter the correct settings for the ``interface``.
-
+In the config.py file, enter the correct settings for the ``interface``. If you want to save detected RemoteID signals to a CSV file, uncomment ``log_path``
 
 
 ## Usage

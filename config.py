@@ -6,5 +6,5 @@
 import random
 
 #ther serial interface where the DroneScout Bridge outputs data
-interface = "/dev/ttyUSB0" 
+interface = "/dev/ttyACM0" 
 baudrate = 115200 # for now only 115200 is supported

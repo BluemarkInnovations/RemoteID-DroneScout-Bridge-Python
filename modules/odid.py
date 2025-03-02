@@ -151,7 +151,7 @@ def print_operatorID(payload):
 	operatorID_type = payload[1]
 	operatorID = payload[2:2 + ODID_ID_SIZE]
 
-	print("Type: %i" % operatorID_type)
+	print("Type: %s" % decode_operatorID_type(operatorID_type))
 	print("Text: %s" % clean_string(bytes(operatorID).decode('ascii')))
 
 #removes characters like \t \n \r space from string
@@ -288,17 +288,6 @@ def decode_system_operator_location_type(operator_location_type):
 
     return string
 
-def decode_system_ua_classification_type(ua_classification_type):
-    string = ""
-    if operator_location_type == 0:
-        string = "Take Off"
-    elif operator_location_type == 1:
-        string = "Dynamic"
-    elif operator_location_type == 2:
-        string = "Fixed"
-
-    return string
-
 def decode_system_ua_category(ua_category):
     string = ""
     if ua_category == 0:
@@ -349,3 +338,9 @@ def location_decode_speed_horizontal(speed_enc, speed_mult):
     else:
         return speed_enc * 0.75
 
+def decode_operatorID_type(operatorID_type):
+    string = ""
+    if operatorID_type == 0:
+        string = "Operator ID"
+
+    return string

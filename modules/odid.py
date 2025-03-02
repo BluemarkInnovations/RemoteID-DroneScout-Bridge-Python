@@ -24,38 +24,38 @@ def print_message_pack(payload, size):
 		ProtoVersion = payload[x*ODID_MESSAGE_SIZE] & 0x0F
 		if (ODID_MESSAGETYPE(RIDtype) == ODID_MESSAGETYPE.ODID_MESSAGETYPE_BASIC_ID):
 			print("\n===BasicID===")
-			print("RIDtype: %i" % RIDtype)
-			print("ProtoVersion: %i" % ProtoVersion)
+			print("RID Type: %i" % RIDtype)
+			print("Proto Version: %i" % ProtoVersion)
 			print_basicID(payload[x*ODID_MESSAGE_SIZE:x*ODID_MESSAGE_SIZE + ODID_MESSAGE_SIZE])
 
 		if (ODID_MESSAGETYPE(RIDtype) == ODID_MESSAGETYPE.ODID_MESSAGETYPE_LOCATION):
 			print("\n===Location===")
-			print("RIDtype: %i" % RIDtype)
-			print("ProtoVersion: %i" % ProtoVersion)
+			print("RID Type: %i" % RIDtype)
+			print("Proto Version: %i" % ProtoVersion)
 			print_location(payload[x*ODID_MESSAGE_SIZE:x*ODID_MESSAGE_SIZE + ODID_MESSAGE_SIZE])
 
 		if (ODID_MESSAGETYPE(RIDtype) == ODID_MESSAGETYPE.ODID_MESSAGETYPE_AUTH):
 			print("\n===Auth===")
-			print("RIDtype: %i" % RIDtype)
-			print("ProtoVersion: %i" % ProtoVersion)
+			print("RID Type: %i" % RIDtype)
+			print("Proto Version: %i" % ProtoVersion)
 			print_auth(payload[x*ODID_MESSAGE_SIZE:x*ODID_MESSAGE_SIZE + ODID_MESSAGE_SIZE])
 
 		if (ODID_MESSAGETYPE(RIDtype) == ODID_MESSAGETYPE.ODID_MESSAGETYPE_SELF_ID):
 			print("\n===SelfID===")
-			print("RIDtype: %i" % RIDtype)
-			print("ProtoVersion: %i" % ProtoVersion)
+			print("RID Type: %i" % RIDtype)
+			print("Proto Version: %i" % ProtoVersion)
 			print_selfID(payload[x*ODID_MESSAGE_SIZE:x*ODID_MESSAGE_SIZE + ODID_MESSAGE_SIZE])
 
 		if (ODID_MESSAGETYPE(RIDtype) == ODID_MESSAGETYPE.ODID_MESSAGETYPE_SYSTEM):
 			print("\n===System===")
-			print("RIDtype: %i" % RIDtype)
-			print("ProtoVersion: %i" % ProtoVersion)
+			print("RID Type: %i" % RIDtype)
+			print("Proto Version: %i" % ProtoVersion)
 			print_system(payload[x*ODID_MESSAGE_SIZE:x*ODID_MESSAGE_SIZE + ODID_MESSAGE_SIZE])
 
 		if (ODID_MESSAGETYPE(RIDtype) == ODID_MESSAGETYPE.ODID_MESSAGETYPE_OPERATOR_ID):
 			print("\n===OperatorID===")
-			print("RIDtype: %i" % RIDtype)
-			print("ProtoVersion: %i" % ProtoVersion)
+			print("RID Type: %i" % RIDtype)
+			print("Proto Version: %i" % ProtoVersion)
 			print_operatorID(payload[x*ODID_MESSAGE_SIZE:x*ODID_MESSAGE_SIZE + ODID_MESSAGE_SIZE])
 
 def print_basicID(payload):
@@ -74,7 +74,10 @@ def print_location(payload):
 	HeightType = (payload[1] >> 2) & 0x01
 	Direction = payload[2]
 	SpeedHorizontal = payload[3]
-	SpeedVertical = payload[4]
+	SpeedVertical = int(payload[4])*0.5
+	if SpeedVertical == 63:
+		SpeedVertical = float('NaN')
+
 	Latitude = int(struct.unpack('i', bytes(payload)[5:9])[0])
 	Longitude = int(struct.unpack('i', bytes(payload)[9:13])[0])
 	AltitudeBaro = struct.unpack('H', bytes(payload)[13:15])
@@ -92,8 +95,8 @@ def print_location(payload):
 	print("EW Direction: %i" % EWDirection)
 	print("Height Type: %s" % decode_location_height_type(HeightType))
 	print("Direction: %i" % Direction)
-	print("Speed Horizontal: %i" % SpeedHorizontal)
-	print("Speed Vertical: %i" % SpeedVertical)
+	print("Speed Horizontal: %f" % location_decode_speed_horizontal(SpeedHorizontal, SpeedMult))
+	print("Speed Vertical: %f" % SpeedVertical)
 	print("Latitude: %f" % (float(Latitude)/(10*1000*1000)))
 	print("Longitude: %f" % (float(Longitude)/(10*1000*1000)))
 	print("Altitude Baro: %f" % ((int(AltitudeBaro[0]) - int(2000))/2))
@@ -336,4 +339,13 @@ def decode_system_timestamp(timestamp):
     string = datetime.datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S') + " UTC"
 
     return string
+
+def location_decode_speed_horizontal(speed_enc, speed_mult):
+    if speed_enc == 255:
+	    return float('NaN')
+    speed_enc = float (speed_enc)
+    if speed_mult == 1:
+        return float ((float(speed_enc) * 0.75) + (255 * 0.25))
+    else:
+        return speed_enc * 0.75
 

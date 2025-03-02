@@ -51,15 +51,6 @@ def transmit(data):
         sbs_connection.close()
     return
 
-def location_decode_speed_horizontal(speed_enc, speed_mult):
-    if speed_enc == 255:
-	    return float('NaN')
-    speed_enc = float (speed_enc)
-    if speed_mult == 1:
-        return float ((float(speed_enc) * 0.75) + (255 * 0.25))
-    else:
-        return speed_enc * 0.75
-
 def export(payload, size):
 
     try:
@@ -102,7 +93,7 @@ def export(payload, size):
                 if Direction > 360 or Direction < 0:
                     Direction = 0.0
 
-                SpeedHorizontal = location_decode_speed_horizontal(payload[x*odid.ODID_MESSAGE_SIZE + 3], SpeedMult)
+                SpeedHorizontal = odid.location_decode_speed_horizontal(payload[x*odid.ODID_MESSAGE_SIZE + 3], SpeedMult)
 
         # decode the entire message pack, now create SBS messages
         if BasicIDpresent == 1:

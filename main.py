@@ -25,6 +25,10 @@ if hasattr(config, 'sbs_server_ip_address'): # only enable SBS export if relevan
 master = mavutil.mavlink_connection(config.interface, config.baudrate)
 master.wait_heartbeat()
 
+# if this var is not defined, make it true
+if not hasattr(config, 'print_messages'):
+    config.print_messages = True
+        
 while True:
     try:
         msg = master.recv_match()
@@ -37,23 +41,29 @@ while True:
     current_time = time.strftime("%H:%M:%S", t)
 
     if msg.get_type() == 'HEARTBEAT':
-        #print("%s" % msg.to_dict())
-        print("%s MAVLink heartbeat received" % current_time)
+        
+        if config.print_messages == True:
+            print("%s MAVLink heartbeat received" % current_time)
+            #print("%s" % msg.to_dict())
 
     if msg.get_type() == 'ADSB_VEHICLE':
-        print("\n%s MAVLink ADS-B vehicle message received" % current_time)
-        #print("%s" % msg.to_dict())
+        if config.print_messages == True:
+            print("\n%s MAVLink ADS-B vehicle message received" % current_time)
+            #print("%s" % msg.to_dict())
         adsb.print_payload(msg)
 
     if msg.get_type() == 'OPEN_DRONE_ID_MESSAGE_PACK':
-        print("\n%s MAVLink OpenDroneID Message Pack message received" % current_time)
-        #print("\n%s" % msg.to_dict()) #print raw packet contents
-        odid.print_message_pack(msg.messages, msg.msg_pack_size)
+        if config.print_messages == True:
+            print("\n%s MAVLink OpenDroneID Message Pack message received" % current_time)
+            #print("\n%s" % msg.to_dict()) #print raw packet contents
+            odid.print_message_pack(msg.messages, msg.msg_pack_size)
+
         if hasattr(config, 'log_path'):
             if 'filename' not in globals():
                 global filename
                 filename = log_file.open_csv(config.log_path)
             log_file.write_csv(msg.messages, msg.msg_pack_size,filename)
+
         if hasattr(config, 'sbs_server_ip_address'):
             try:
                 sbs.export(msg.messages, msg.msg_pack_size)

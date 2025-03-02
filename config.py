@@ -9,6 +9,9 @@ import random
 interface = "/dev/ttyACM0" 
 baudrate = 115200 # for now only 115200 is supported
 
+#set to False to disable printing messages on the console
+print_messages = True
+
 # save the detected Remote ID signals to a CSV file in the log_path folder
 # uncomment to enable logging
 # only basic information like SN, drone location/altitude and pilot location/alitude

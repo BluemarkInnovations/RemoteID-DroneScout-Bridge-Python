@@ -3,18 +3,7 @@ from enum import Enum
 import socket
 import config
 
-ODID_ID_SIZE = 20
-ODID_MESSAGE_SIZE = 25
-
-#define MAVLink messages types
-class ODID_MESSAGETYPE(Enum):
-    ODID_MESSAGETYPE_BASIC_ID = 0
-    ODID_MESSAGETYPE_LOCATION = 1
-    ODID_MESSAGETYPE_AUTH = 2
-    ODID_MESSAGETYPE_SELF_ID = 3
-    ODID_MESSAGETYPE_SYSTEM = 4
-    ODID_MESSAGETYPE_OPERATOR_ID = 5
-    ODID_MESSAGETYPE_PACKED = 0xF
+from modules import odid # opendroneID functions
 
 def connect(name):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -50,15 +39,6 @@ def callsign(data):
         callsign += str(data[-4:]) # last 4 digit SN
         callsign = callsign.ljust(8)
     return callsign
-
-#removes characters like \t \n \r space from string
-def clean_SN(string):
-    string = string.replace(" ", "")
-    string = string.replace("\t", "")
-    string = string.replace("\n", "")
-    string = string.replace("\r", "")
-
-    return string
 
 def transmit(data):
     try:
@@ -102,27 +82,27 @@ def export(payload, size):
         BasicIDpresent = 0
         Locationpresent = 0
         for x in range(size):
-            RIDtype = payload[x*ODID_MESSAGE_SIZE] >> 4
-            if (ODID_MESSAGETYPE(RIDtype) == ODID_MESSAGETYPE.ODID_MESSAGETYPE_BASIC_ID):
+            RIDtype = payload[x*odid.ODID_MESSAGE_SIZE] >> 4
+            if (odid.ODID_MESSAGETYPE(RIDtype) == odid.ODID_MESSAGETYPE.ODID_MESSAGETYPE_BASIC_ID):
                 BasicIDpresent = 1
-                IDType = int(payload[x*ODID_MESSAGE_SIZE + 1] >> 4)
-                UASID = (payload[x*ODID_MESSAGE_SIZE + 2: x*ODID_MESSAGE_SIZE + 2 + ODID_ID_SIZE])
-                UASID = clean_SN(bytes(UASID).decode('ascii'))
+                IDType = int(payload[x*odid.ODID_MESSAGE_SIZE + 1] >> 4)
+                UASID = (payload[x*odid.ODID_MESSAGE_SIZE + 2: x*odid.ODID_MESSAGE_SIZE + 2 + odid.ODID_ID_SIZE])
+                UASID = odid.clean_SN(bytes(UASID).decode('ascii'))
                 output_str = ""
 
-            if (ODID_MESSAGETYPE(RIDtype) == ODID_MESSAGETYPE.ODID_MESSAGETYPE_LOCATION):
+            if (odid.ODID_MESSAGETYPE(RIDtype) == odid.ODID_MESSAGETYPE.ODID_MESSAGETYPE_LOCATION):
                 Locationpresent = 1
-                Status = (payload[x*ODID_MESSAGE_SIZE + 1] >> 4) & 0x0F
-                SpeedMult = payload[x*ODID_MESSAGE_SIZE + 1] & 0x01
-                Latitude = float(struct.unpack('i', bytes(payload)[x*ODID_MESSAGE_SIZE + 5: x*ODID_MESSAGE_SIZE + 9])[0])/(10*1000*1000)
-                Longitude = float(struct.unpack('i', bytes(payload)[x*ODID_MESSAGE_SIZE + 9: x*ODID_MESSAGE_SIZE + 13])[0])/(10*1000*1000)
-                AltitudeGeo = struct.unpack('H', bytes(payload)[x*ODID_MESSAGE_SIZE + 15:x*ODID_MESSAGE_SIZE + 17])
+                Status = (payload[x*odid.ODID_MESSAGE_SIZE + 1] >> 4) & 0x0F
+                SpeedMult = payload[x*odid.ODID_MESSAGE_SIZE + 1] & 0x01
+                Latitude = float(struct.unpack('i', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 5: x*odid.ODID_MESSAGE_SIZE + 9])[0])/(10*1000*1000)
+                Longitude = float(struct.unpack('i', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 9: x*odid.ODID_MESSAGE_SIZE + 13])[0])/(10*1000*1000)
+                AltitudeGeo = struct.unpack('H', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 15:x*odid.ODID_MESSAGE_SIZE + 17])
                 AltitudeGeo = (int(AltitudeGeo[0]) - int(2000))/2
-                Direction = int(payload[x*ODID_MESSAGE_SIZE + 2])
+                Direction = int(payload[x*odid.ODID_MESSAGE_SIZE + 2])
                 if Direction > 360 or Direction < 0:
                     Direction = 0.0
 
-                SpeedHorizontal = location_decode_speed_horizontal(payload[x*ODID_MESSAGE_SIZE + 3], SpeedMult)
+                SpeedHorizontal = location_decode_speed_horizontal(payload[x*odid.ODID_MESSAGE_SIZE + 3], SpeedMult)
 
         # decode the entire message pack, now create SBS messages
         if BasicIDpresent == 1:

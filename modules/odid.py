@@ -104,7 +104,7 @@ def print_location(payload):
 	SpeedMult = payload[1] & 0x01
 	EWDirection = (payload[1] >> 1) & 0x01
 	HeightType = (payload[1] >> 2) & 0x01
-	Direction = payload[2]
+	Direction = payload[2] + 180*EWDirection # direction is encoded as 0-179 plus an east/west flag
 	SpeedHorizontal = payload[3]
 	SpeedVertical = int(payload[4])*0.5
 	if SpeedVertical == 63:

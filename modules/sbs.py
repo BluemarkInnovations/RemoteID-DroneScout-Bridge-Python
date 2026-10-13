@@ -89,7 +89,8 @@ def export(payload, size):
                 Longitude = float(struct.unpack('i', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 9: x*odid.ODID_MESSAGE_SIZE + 13])[0])/(10*1000*1000)
                 AltitudeGeo = struct.unpack('H', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 15:x*odid.ODID_MESSAGE_SIZE + 17])
                 AltitudeGeo = (int(AltitudeGeo[0]) - int(2000))/2
-                Direction = int(payload[x*odid.ODID_MESSAGE_SIZE + 2])
+                EWDirection = (payload[x*odid.ODID_MESSAGE_SIZE + 1] >> 1) & 0x01
+                Direction = int(payload[x*odid.ODID_MESSAGE_SIZE + 2]) + 180*EWDirection
                 if Direction > 360 or Direction < 0:
                     Direction = 0.0
 

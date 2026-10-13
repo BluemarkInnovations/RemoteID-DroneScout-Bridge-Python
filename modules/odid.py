@@ -1,6 +1,6 @@
 # OpenDroneID functions
 from bitstruct import *
-from enum import Enum
+from enum import IntEnum
 import datetime
 
 from modules import rid
@@ -35,7 +35,7 @@ def print_rx_information(msg):
     print("Model:\t\t\t%s" % (msg.model if msg.model else "unknown"))
 
 #define MAVLink messages types
-class ODID_MESSAGETYPE(Enum):
+class ODID_MESSAGETYPE(IntEnum):
     ODID_MESSAGETYPE_BASIC_ID = 0
     ODID_MESSAGETYPE_LOCATION = 1
     ODID_MESSAGETYPE_AUTH = 2
@@ -53,37 +53,37 @@ def print_message_pack(payload, size):
 	for x in range(size):
 		RIDtype = payload[x*ODID_MESSAGE_SIZE] >> 4
 		ProtoVersion = payload[x*ODID_MESSAGE_SIZE] & 0x0F
-		if (ODID_MESSAGETYPE(RIDtype) == ODID_MESSAGETYPE.ODID_MESSAGETYPE_BASIC_ID):
+		if (RIDtype == ODID_MESSAGETYPE.ODID_MESSAGETYPE_BASIC_ID):
 			print("\n===BasicID===")
 			print("RID Type: %i" % RIDtype)
 			print("Proto Version: %i" % ProtoVersion)
 			print_basicID(payload[x*ODID_MESSAGE_SIZE:x*ODID_MESSAGE_SIZE + ODID_MESSAGE_SIZE])
 
-		if (ODID_MESSAGETYPE(RIDtype) == ODID_MESSAGETYPE.ODID_MESSAGETYPE_LOCATION):
+		if (RIDtype == ODID_MESSAGETYPE.ODID_MESSAGETYPE_LOCATION):
 			print("\n===Location===")
 			print("RID Type: %i" % RIDtype)
 			print("Proto Version: %i" % ProtoVersion)
 			print_location(payload[x*ODID_MESSAGE_SIZE:x*ODID_MESSAGE_SIZE + ODID_MESSAGE_SIZE])
 
-		if (ODID_MESSAGETYPE(RIDtype) == ODID_MESSAGETYPE.ODID_MESSAGETYPE_AUTH):
+		if (RIDtype == ODID_MESSAGETYPE.ODID_MESSAGETYPE_AUTH):
 			print("\n===Auth===")
 			print("RID Type: %i" % RIDtype)
 			print("Proto Version: %i" % ProtoVersion)
 			print_auth(payload[x*ODID_MESSAGE_SIZE:x*ODID_MESSAGE_SIZE + ODID_MESSAGE_SIZE])
 
-		if (ODID_MESSAGETYPE(RIDtype) == ODID_MESSAGETYPE.ODID_MESSAGETYPE_SELF_ID):
+		if (RIDtype == ODID_MESSAGETYPE.ODID_MESSAGETYPE_SELF_ID):
 			print("\n===SelfID===")
 			print("RID Type: %i" % RIDtype)
 			print("Proto Version: %i" % ProtoVersion)
 			print_selfID(payload[x*ODID_MESSAGE_SIZE:x*ODID_MESSAGE_SIZE + ODID_MESSAGE_SIZE])
 
-		if (ODID_MESSAGETYPE(RIDtype) == ODID_MESSAGETYPE.ODID_MESSAGETYPE_SYSTEM):
+		if (RIDtype == ODID_MESSAGETYPE.ODID_MESSAGETYPE_SYSTEM):
 			print("\n===System===")
 			print("RID Type: %i" % RIDtype)
 			print("Proto Version: %i" % ProtoVersion)
 			print_system(payload[x*ODID_MESSAGE_SIZE:x*ODID_MESSAGE_SIZE + ODID_MESSAGE_SIZE])
 
-		if (ODID_MESSAGETYPE(RIDtype) == ODID_MESSAGETYPE.ODID_MESSAGETYPE_OPERATOR_ID):
+		if (RIDtype == ODID_MESSAGETYPE.ODID_MESSAGETYPE_OPERATOR_ID):
 			print("\n===OperatorID===")
 			print("RID Type: %i" % RIDtype)
 			print("Proto Version: %i" % ProtoVersion)

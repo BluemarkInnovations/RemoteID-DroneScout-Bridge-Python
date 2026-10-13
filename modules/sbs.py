@@ -74,14 +74,14 @@ def export(payload, size):
         Locationpresent = 0
         for x in range(size):
             RIDtype = payload[x*odid.ODID_MESSAGE_SIZE] >> 4
-            if (odid.ODID_MESSAGETYPE(RIDtype) == odid.ODID_MESSAGETYPE.ODID_MESSAGETYPE_BASIC_ID):
+            if (RIDtype == odid.ODID_MESSAGETYPE.ODID_MESSAGETYPE_BASIC_ID):
                 BasicIDpresent = 1
                 IDType = int(payload[x*odid.ODID_MESSAGE_SIZE + 1] >> 4)
                 UASID = (payload[x*odid.ODID_MESSAGE_SIZE + 2: x*odid.ODID_MESSAGE_SIZE + 2 + odid.ODID_ID_SIZE])
                 UASID = odid.clean_SN(odid.clean_id(UASID))
                 output_str = ""
 
-            if (odid.ODID_MESSAGETYPE(RIDtype) == odid.ODID_MESSAGETYPE.ODID_MESSAGETYPE_LOCATION):
+            if (RIDtype == odid.ODID_MESSAGETYPE.ODID_MESSAGETYPE_LOCATION):
                 Locationpresent = 1
                 Status = (payload[x*odid.ODID_MESSAGE_SIZE + 1] >> 4) & 0x0F
                 SpeedMult = payload[x*odid.ODID_MESSAGE_SIZE + 1] & 0x01

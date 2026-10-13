@@ -54,6 +54,12 @@ while True:
         msg = master.recv_match()
     except Exception:
         msg = None # don't process the previous message again
+
+    # forget RX info of transmitters not heard recently (BLE MAC addresses change often)
+    now = time.time()
+    for key in [k for k, v in last_rx_info.items() if now - v[0] >= RX_INFO_MAX_AGE]:
+        del last_rx_info[key]
+
     if not msg:
         time.sleep(0.1)
         continue

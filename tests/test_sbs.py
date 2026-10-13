@@ -36,6 +36,12 @@ class TestSBS(unittest.TestCase):
         self.assertEqual(msg4[11], str(round(100.0*3.28084)))
         self.assertEqual(msg4[12], str(round(15.0*3.28084)))
 
+    def test_unknown_speed_is_left_empty(self):
+        payload, size = builder.pack(builder.basic_id(b'SN1'), builder.location(52.1, 4.2, speed_enc=255))
+        sbs.export(payload, size)
+        msg1, msg3, msg4 = self.lines()
+        self.assertEqual(msg4[12], '')
+
     def test_only_serial_numbers_are_exported(self):
         payload, size = builder.pack(builder.basic_id(b'\xc3\xa9AB', id_type=4))
         sbs.export(payload, size)

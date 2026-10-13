@@ -1,3 +1,4 @@
+import math
 import socket
 import struct
 import config
@@ -38,6 +39,10 @@ def callsign(data):
         callsign += str(data[-4:]) # last 4 digit SN
         callsign = callsign.ljust(8)
     return callsign
+
+def rounded(value):
+    # unknown values (NaN) are left empty
+    return '' if math.isnan(value) else str(round(value))
 
 def transmit(data):
     try:
@@ -115,7 +120,7 @@ def export(payload, size):
 
                     output_str += str(",")
                     if Status == 1: #ground
-                        output_str += str(round(SpeedHorizontal*3.28084))
+                        output_str += rounded(SpeedHorizontal*3.28084)
 
                     output_str += str(",")
                     output_str += str(round(Direction))
@@ -133,7 +138,7 @@ def export(payload, size):
                         output_str += str(",,,,,,,")
                         output_str += str(round(AltitudeGeo*3.28084))
                         output_str += str(",")
-                        output_str += str(round(SpeedHorizontal*3.28084))
+                        output_str += rounded(SpeedHorizontal*3.28084)
                         output_str += str(",")
                         output_str += str(round(Direction))
                         output_str += str(",,,,0,0,0,0\n")

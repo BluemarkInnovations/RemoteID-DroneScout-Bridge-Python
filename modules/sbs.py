@@ -85,9 +85,9 @@ def export(payload, size):
                 Locationpresent = 1
                 Status = (payload[x*odid.ODID_MESSAGE_SIZE + 1] >> 4) & 0x0F
                 SpeedMult = payload[x*odid.ODID_MESSAGE_SIZE + 1] & 0x01
-                Latitude = float(struct.unpack('i', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 5: x*odid.ODID_MESSAGE_SIZE + 9])[0])/(10*1000*1000)
-                Longitude = float(struct.unpack('i', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 9: x*odid.ODID_MESSAGE_SIZE + 13])[0])/(10*1000*1000)
-                AltitudeGeo = struct.unpack('H', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 15:x*odid.ODID_MESSAGE_SIZE + 17])
+                Latitude = float(struct.unpack('<i', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 5: x*odid.ODID_MESSAGE_SIZE + 9])[0])/(10*1000*1000)
+                Longitude = float(struct.unpack('<i', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 9: x*odid.ODID_MESSAGE_SIZE + 13])[0])/(10*1000*1000)
+                AltitudeGeo = struct.unpack('<H', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 15:x*odid.ODID_MESSAGE_SIZE + 17])
                 AltitudeGeo = (int(AltitudeGeo[0]) - int(2000))/2
                 EWDirection = (payload[x*odid.ODID_MESSAGE_SIZE + 1] >> 1) & 0x01
                 Direction = int(payload[x*odid.ODID_MESSAGE_SIZE + 2]) + 180*EWDirection

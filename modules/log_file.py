@@ -68,16 +68,16 @@ def write_csv(payload, size, filename, rx=None):
                 UASID = odid.clean_SN(odid.clean_id(payload[x*odid.ODID_MESSAGE_SIZE + 2: x*odid.ODID_MESSAGE_SIZE + 2 + odid.ODID_ID_SIZE]))
 
             if (RIDtype == odid.ODID_MESSAGETYPE.ODID_MESSAGETYPE_LOCATION):
-                Latitude = float(struct.unpack('i', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 5: x*odid.ODID_MESSAGE_SIZE + 9])[0])/(10*1000*1000)
-                Longitude = float(struct.unpack('i', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 9: x*odid.ODID_MESSAGE_SIZE + 13])[0])/(10*1000*1000)
-                AltitudeGeo = struct.unpack('H', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 15:x*odid.ODID_MESSAGE_SIZE + 17])
+                Latitude = float(struct.unpack('<i', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 5: x*odid.ODID_MESSAGE_SIZE + 9])[0])/(10*1000*1000)
+                Longitude = float(struct.unpack('<i', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 9: x*odid.ODID_MESSAGE_SIZE + 13])[0])/(10*1000*1000)
+                AltitudeGeo = struct.unpack('<H', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 15:x*odid.ODID_MESSAGE_SIZE + 17])
                 AltitudeGeo = (int(AltitudeGeo[0]) - int(2000))/2
-                Height = struct.unpack('H', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 17:x*odid.ODID_MESSAGE_SIZE + 19])
+                Height = struct.unpack('<H', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 17:x*odid.ODID_MESSAGE_SIZE + 19])
                 Height = (int(Height[0]) - int(2000))/2
 
             if (RIDtype == odid.ODID_MESSAGETYPE.ODID_MESSAGETYPE_SYSTEM):
-                OperatorLatitude = float(struct.unpack('i', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 2: x*odid.ODID_MESSAGE_SIZE + 6])[0])/(10*1000*1000)
-                OperatorLongitude = float(struct.unpack('i', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 6: x*odid.ODID_MESSAGE_SIZE + 10])[0])/(10*1000*1000)
+                OperatorLatitude = float(struct.unpack('<i', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 2: x*odid.ODID_MESSAGE_SIZE + 6])[0])/(10*1000*1000)
+                OperatorLongitude = float(struct.unpack('<i', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 6: x*odid.ODID_MESSAGE_SIZE + 10])[0])/(10*1000*1000)
                 OperatorAltitudeGeo = struct.unpack('<h', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 18:x*odid.ODID_MESSAGE_SIZE + 20])
                 OperatorAltitudeGeo = (int(OperatorAltitudeGeo[0]) - int(2000))/2
 

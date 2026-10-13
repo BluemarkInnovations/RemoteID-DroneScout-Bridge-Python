@@ -110,11 +110,11 @@ def print_location(payload):
 	if SpeedVertical == 63:
 		SpeedVertical = float('NaN')
 
-	Latitude = int(struct.unpack('i', bytes(payload)[5:9])[0])
-	Longitude = int(struct.unpack('i', bytes(payload)[9:13])[0])
-	AltitudeBaro = struct.unpack('H', bytes(payload)[13:15])
-	AltitudeGeo = struct.unpack('H', bytes(payload)[15:17])
-	Height = struct.unpack('H', bytes(payload)[17:19])
+	Latitude = int(struct.unpack('<i', bytes(payload)[5:9])[0])
+	Longitude = int(struct.unpack('<i', bytes(payload)[9:13])[0])
+	AltitudeBaro = struct.unpack('<H', bytes(payload)[13:15])
+	AltitudeGeo = struct.unpack('<H', bytes(payload)[15:17])
+	Height = struct.unpack('<H', bytes(payload)[17:19])
 	HorizAccuracy = payload[19] & 0x0F
 	VertAccuracy = (payload[19] >> 4)& 0x0F
 	BaroAccuracy = (payload[20] >> 4)& 0x0F
@@ -155,8 +155,8 @@ def print_system(payload):
 	flags = payload[1]
 	classification_type = (flags >> 2) & 0x03
 	operator_location_type = flags & 0x03
-	OperatorLatitude = int(struct.unpack('i', bytes(payload)[2:6])[0])
-	OperatorLongitude = int(struct.unpack('i', bytes(payload)[6:10])[0])
+	OperatorLatitude = int(struct.unpack('<i', bytes(payload)[2:6])[0])
+	OperatorLongitude = int(struct.unpack('<i', bytes(payload)[6:10])[0])
 	AreaCount = struct.unpack('<H', bytes(payload[10:12]))[0]
 	AreaRadius = int(payload[12])
 	AreaCeiling = struct.unpack('<h', bytes(payload[13:15]))

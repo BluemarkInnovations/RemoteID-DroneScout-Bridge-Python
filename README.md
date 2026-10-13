@@ -36,7 +36,7 @@ DroneScout bridge has several use cases:
 The code is Python3 code. It needs these dependencies (tested under Ubuntu):
 
 ```
-sudo pip3 install pymavlink bitstruct
+sudo pip3 install pymavlink
 ```
 
 

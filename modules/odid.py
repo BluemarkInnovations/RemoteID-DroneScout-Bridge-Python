@@ -1,7 +1,7 @@
 # OpenDroneID functions
-from bitstruct import *
-from enum import IntEnum
+import struct
 import datetime
+from enum import IntEnum
 
 from modules import rid
 
@@ -216,14 +216,6 @@ PRINTERS = {
 #removes characters like \t \n \r space from string
 def clean_SN(string):
     string = string.replace(" ", "")
-    string = string.replace("\t", "")
-    string = string.replace("\n", "")
-    string = string.replace("\r", "")
-
-    return string
-
-#removes characters like \t \n \r from string
-def clean_string(string):
     string = string.replace("\t", "")
     string = string.replace("\n", "")
     string = string.replace("\r", "")

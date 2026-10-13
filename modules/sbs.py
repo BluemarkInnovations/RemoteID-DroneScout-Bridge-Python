@@ -1,11 +1,10 @@
-from bitstruct import *
-from enum import Enum
 import socket
+import struct
 import config
 
 from modules import odid # opendroneID functions
 
-def connect(name):
+def connect():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind((config.sbs_server_ip_address, config.sbs_server_port))

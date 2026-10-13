@@ -7,7 +7,6 @@ os.environ['MAVLINK20'] = '1'   # use the MAVLink 2 dialects; must be before imp
 
 import time
 from pymavlink import mavutil
-from bitstruct import *
 import threading
 
 from modules import odid # opendroneID functions
@@ -38,7 +37,7 @@ import config # config.py with settings
 if hasattr(config, 'sbs_server_ip_address'): # only enable SBS export if relevant vars have been defined
     if hasattr(config, 'sbs_server_port'):
         print("SBS export thread started")
-        sbs_thread = threading.Thread(target=sbs.connect, args=(1,))
+        sbs_thread = threading.Thread(target=sbs.connect)
         sbs_thread.daemon = True
         sbs_thread.start()
 

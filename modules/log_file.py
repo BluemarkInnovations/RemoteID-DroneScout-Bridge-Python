@@ -1,8 +1,6 @@
 import csv
 import os
-from enum import Enum
 from datetime import datetime, timezone
-from bitstruct import *
 
 from modules import odid # opendroneID functions
 from modules import rid  # OPEN_DRONE_ID_RADIO_RX_INFORMATION definitions

@@ -78,7 +78,7 @@ def export(payload, size):
                 BasicIDpresent = 1
                 IDType = int(payload[x*odid.ODID_MESSAGE_SIZE + 1] >> 4)
                 UASID = (payload[x*odid.ODID_MESSAGE_SIZE + 2: x*odid.ODID_MESSAGE_SIZE + 2 + odid.ODID_ID_SIZE])
-                UASID = odid.clean_SN(bytes(UASID).decode('ascii'))
+                UASID = odid.clean_SN(odid.clean_id(UASID))
                 output_str = ""
 
             if (odid.ODID_MESSAGETYPE(RIDtype) == odid.ODID_MESSAGETYPE.ODID_MESSAGETYPE_LOCATION):

@@ -96,7 +96,7 @@ def print_basicID(payload):
 
 	print("UAType: %s" % decode_basicID_UA_type(UAType))
 	print("IDType: %s" % decode_basicID_ID_type(IDType))
-	print("UASID: %s" % clean_SN(bytes(UASID).decode('ascii')))
+	print("UASID: %s" % clean_SN(clean_id(UASID)))
 
 def print_location(payload):
 	Status = (payload[1] >> 4) & 0x0F
@@ -148,7 +148,7 @@ def print_selfID(payload):
 	selfID_text = payload[2:2 + ODID_STR_SIZE]
 
 	print("Type: %s" % decode_selfID_type(selfID_type))
-	print("Text: %s" % clean_string(bytes(selfID_text).decode('ascii')))
+	print("Text: %s" % clean_id(selfID_text))
 
 def print_system(payload):
 	flags = payload[1]
@@ -183,7 +183,7 @@ def print_operatorID(payload):
 	operatorID = payload[2:2 + ODID_ID_SIZE]
 
 	print("Type: %s" % decode_operatorID_type(operatorID_type))
-	print("Text: %s" % clean_string(bytes(operatorID).decode('ascii')))
+	print("Text: %s" % clean_id(operatorID))
 
 #removes characters like \t \n \r space from string
 def clean_SN(string):
@@ -201,6 +201,11 @@ def clean_string(string):
     string = string.replace("\r", "")
 
     return string
+
+#keeps printable ASCII only and stops at the first NUL; fields can contain binary data (e.g. session IDs)
+def clean_id(raw):
+    raw = bytes(raw).split(b'\x00', 1)[0]
+    return ''.join(chr(b) for b in raw if 32 <= b < 127)
 
 def decode_basicID_ID_type(IDType):
     string = ""

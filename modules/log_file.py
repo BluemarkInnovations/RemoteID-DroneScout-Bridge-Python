@@ -24,10 +24,6 @@ def open_csv(log_path):
          )
     return filename
 
-def clean_id(raw):
-    raw = bytes(raw).split(b'\x00', 1)[0]                   # stop at first NUL
-    return ''.join(chr(b) for b in raw if 32 <= b < 127)    # keep printable ASCII only
-
 def rx_columns(rx):
     # returns the RX information columns, or empty columns if no RX info is available
     if rx is None:
@@ -69,7 +65,7 @@ def write_csv(payload, size, filename, rx=None):
             if (odid.ODID_MESSAGETYPE(RIDtype) == odid.ODID_MESSAGETYPE.ODID_MESSAGETYPE_BASIC_ID):
                 IDType = payload[x*odid.ODID_MESSAGE_SIZE + 1] >> 4
                 UAType = payload[x*odid.ODID_MESSAGE_SIZE + 1] & 0x0F
-                UASID = odid.clean_SN(clean_id(payload[x*odid.ODID_MESSAGE_SIZE + 2: x*odid.ODID_MESSAGE_SIZE + 2 + odid.ODID_ID_SIZE]))
+                UASID = odid.clean_SN(odid.clean_id(payload[x*odid.ODID_MESSAGE_SIZE + 2: x*odid.ODID_MESSAGE_SIZE + 2 + odid.ODID_ID_SIZE]))
 
             if (odid.ODID_MESSAGETYPE(RIDtype) == odid.ODID_MESSAGETYPE.ODID_MESSAGETYPE_LOCATION):
                 Latitude = float(struct.unpack('i', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 5: x*odid.ODID_MESSAGE_SIZE + 9])[0])/(10*1000*1000)
@@ -86,7 +82,7 @@ def write_csv(payload, size, filename, rx=None):
                 OperatorAltitudeGeo = (int(OperatorAltitudeGeo[0]) - int(2000))/2
 
             if (odid.ODID_MESSAGETYPE(RIDtype) == odid.ODID_MESSAGETYPE.ODID_MESSAGETYPE_OPERATOR_ID):
-                operatorID = clean_id(payload[x*odid.ODID_MESSAGE_SIZE + 2:x*odid.ODID_MESSAGE_SIZE + 2 + odid.ODID_ID_SIZE])
+                operatorID = odid.clean_id(payload[x*odid.ODID_MESSAGE_SIZE + 2:x*odid.ODID_MESSAGE_SIZE + 2 + odid.ODID_ID_SIZE])
 
         csv_writer.writerow([Detection_Time, UASID, IDType, UAType, Latitude, Longitude, AltitudeGeo, Height,
             OperatorLatitude, OperatorLongitude, OperatorAltitudeGeo, operatorID] + rx_columns(rx))

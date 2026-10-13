@@ -36,11 +36,11 @@ extend_dialect(rid)
 import config # config.py with settings
 
 if hasattr(config, 'sbs_server_ip_address'): # only enable SBS export if relevant vars have been defined
-	if hasattr(config, 'sbs_server_port'):
-		print("SBS export thread started")
-		sbs_thread = threading.Thread(target=sbs.connect, args=(1,))
-		sbs_thread.daemon = True
-		sbs_thread.start()
+    if hasattr(config, 'sbs_server_port'):
+        print("SBS export thread started")
+        sbs_thread = threading.Thread(target=sbs.connect, args=(1,))
+        sbs_thread.daemon = True
+        sbs_thread.start()
 
 #setup MAVLink serial link and wait until a heartbeat is received
 master = mavutil.mavlink_connection(config.interface, config.baudrate)

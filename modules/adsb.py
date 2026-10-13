@@ -1,20 +1,20 @@
 # ADSB vehicle functions
 
 def print_payload(payload):
-	print("ADS-B vehicle")
-	print("ICAO address: %x" % payload.ICAO_address)
-	print("Latitude: %2.7f" % (payload.lat/(10*1000*1000))) # degE7 to degrees
-	print("Longitude: %2.7f" % (payload.lon/(10*1000*1000)))
-	print("Altitude_type: %s" % decode_altitude_type(payload.altitude_type))
-	print("Altitude: %2.1f m" % (payload.altitude/1000)) # mm to m
-	print("heading: %2.1f deg" % (payload.heading/100)) # cdeg to deg
-	print("hor_velocity: %2.2f m/s" % (payload.hor_velocity/100)) # cm/s to m/s
-	print("ver_velocity: %2.2f m/s" % (payload.ver_velocity/100))
-	print("callsign: %s" % payload.callsign)
-	print("emitter_type: %s" % decode_emitter_type(payload.emitter_type))
-	print("tslc: %i s" % payload.tslc)
-	print("flags: %8.8x" % payload.flags)
-	print("squawk: %i\n" % payload.squawk)
+    print("ADS-B vehicle")
+    print("ICAO address: %x" % payload.ICAO_address)
+    print("Latitude: %2.7f" % (payload.lat/(10*1000*1000))) # degE7 to degrees
+    print("Longitude: %2.7f" % (payload.lon/(10*1000*1000)))
+    print("Altitude_type: %s" % decode_altitude_type(payload.altitude_type))
+    print("Altitude: %2.1f m" % (payload.altitude/1000)) # mm to m
+    print("heading: %2.1f deg" % (payload.heading/100)) # cdeg to deg
+    print("hor_velocity: %2.2f m/s" % (payload.hor_velocity/100)) # cm/s to m/s
+    print("ver_velocity: %2.2f m/s" % (payload.ver_velocity/100))
+    print("callsign: %s" % payload.callsign)
+    print("emitter_type: %s" % decode_emitter_type(payload.emitter_type))
+    print("tslc: %i s" % payload.tslc)
+    print("flags: %8.8x" % payload.flags)
+    print("squawk: %i\n" % payload.squawk)
 
 def decode_altitude_type(altitude_type):
     string = ""

@@ -98,7 +98,7 @@ def export(payload, size):
 
         # decode the entire message pack, now create SBS messages
         if BasicIDpresent == 1:
-			#send MSG 1 identification
+            #send MSG 1 identification
             output_str = ""
             output_str += str("MSG,1,,,")
 

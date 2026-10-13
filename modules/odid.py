@@ -51,140 +51,140 @@ ODID_PACK_MAX_MESSAGES = 9 # a MAVLink message pack holds at most 9 messages (22
 
 def print_message_pack(payload, size):
 
-	for x in range(min(size, ODID_PACK_MAX_MESSAGES)):
-		RIDtype = payload[x*ODID_MESSAGE_SIZE] >> 4
-		ProtoVersion = payload[x*ODID_MESSAGE_SIZE] & 0x0F
-		if (RIDtype == ODID_MESSAGETYPE.ODID_MESSAGETYPE_BASIC_ID):
-			print("\n===BasicID===")
-			print("RID Type: %i" % RIDtype)
-			print("Proto Version: %i" % ProtoVersion)
-			print_basicID(payload[x*ODID_MESSAGE_SIZE:x*ODID_MESSAGE_SIZE + ODID_MESSAGE_SIZE])
+    for x in range(min(size, ODID_PACK_MAX_MESSAGES)):
+        RIDtype = payload[x*ODID_MESSAGE_SIZE] >> 4
+        ProtoVersion = payload[x*ODID_MESSAGE_SIZE] & 0x0F
+        if (RIDtype == ODID_MESSAGETYPE.ODID_MESSAGETYPE_BASIC_ID):
+            print("\n===BasicID===")
+            print("RID Type: %i" % RIDtype)
+            print("Proto Version: %i" % ProtoVersion)
+            print_basicID(payload[x*ODID_MESSAGE_SIZE:x*ODID_MESSAGE_SIZE + ODID_MESSAGE_SIZE])
 
-		if (RIDtype == ODID_MESSAGETYPE.ODID_MESSAGETYPE_LOCATION):
-			print("\n===Location===")
-			print("RID Type: %i" % RIDtype)
-			print("Proto Version: %i" % ProtoVersion)
-			print_location(payload[x*ODID_MESSAGE_SIZE:x*ODID_MESSAGE_SIZE + ODID_MESSAGE_SIZE])
+        if (RIDtype == ODID_MESSAGETYPE.ODID_MESSAGETYPE_LOCATION):
+            print("\n===Location===")
+            print("RID Type: %i" % RIDtype)
+            print("Proto Version: %i" % ProtoVersion)
+            print_location(payload[x*ODID_MESSAGE_SIZE:x*ODID_MESSAGE_SIZE + ODID_MESSAGE_SIZE])
 
-		if (RIDtype == ODID_MESSAGETYPE.ODID_MESSAGETYPE_AUTH):
-			print("\n===Auth===")
-			print("RID Type: %i" % RIDtype)
-			print("Proto Version: %i" % ProtoVersion)
-			print_auth(payload[x*ODID_MESSAGE_SIZE:x*ODID_MESSAGE_SIZE + ODID_MESSAGE_SIZE])
+        if (RIDtype == ODID_MESSAGETYPE.ODID_MESSAGETYPE_AUTH):
+            print("\n===Auth===")
+            print("RID Type: %i" % RIDtype)
+            print("Proto Version: %i" % ProtoVersion)
+            print_auth(payload[x*ODID_MESSAGE_SIZE:x*ODID_MESSAGE_SIZE + ODID_MESSAGE_SIZE])
 
-		if (RIDtype == ODID_MESSAGETYPE.ODID_MESSAGETYPE_SELF_ID):
-			print("\n===SelfID===")
-			print("RID Type: %i" % RIDtype)
-			print("Proto Version: %i" % ProtoVersion)
-			print_selfID(payload[x*ODID_MESSAGE_SIZE:x*ODID_MESSAGE_SIZE + ODID_MESSAGE_SIZE])
+        if (RIDtype == ODID_MESSAGETYPE.ODID_MESSAGETYPE_SELF_ID):
+            print("\n===SelfID===")
+            print("RID Type: %i" % RIDtype)
+            print("Proto Version: %i" % ProtoVersion)
+            print_selfID(payload[x*ODID_MESSAGE_SIZE:x*ODID_MESSAGE_SIZE + ODID_MESSAGE_SIZE])
 
-		if (RIDtype == ODID_MESSAGETYPE.ODID_MESSAGETYPE_SYSTEM):
-			print("\n===System===")
-			print("RID Type: %i" % RIDtype)
-			print("Proto Version: %i" % ProtoVersion)
-			print_system(payload[x*ODID_MESSAGE_SIZE:x*ODID_MESSAGE_SIZE + ODID_MESSAGE_SIZE])
+        if (RIDtype == ODID_MESSAGETYPE.ODID_MESSAGETYPE_SYSTEM):
+            print("\n===System===")
+            print("RID Type: %i" % RIDtype)
+            print("Proto Version: %i" % ProtoVersion)
+            print_system(payload[x*ODID_MESSAGE_SIZE:x*ODID_MESSAGE_SIZE + ODID_MESSAGE_SIZE])
 
-		if (RIDtype == ODID_MESSAGETYPE.ODID_MESSAGETYPE_OPERATOR_ID):
-			print("\n===OperatorID===")
-			print("RID Type: %i" % RIDtype)
-			print("Proto Version: %i" % ProtoVersion)
-			print_operatorID(payload[x*ODID_MESSAGE_SIZE:x*ODID_MESSAGE_SIZE + ODID_MESSAGE_SIZE])
+        if (RIDtype == ODID_MESSAGETYPE.ODID_MESSAGETYPE_OPERATOR_ID):
+            print("\n===OperatorID===")
+            print("RID Type: %i" % RIDtype)
+            print("Proto Version: %i" % ProtoVersion)
+            print_operatorID(payload[x*ODID_MESSAGE_SIZE:x*ODID_MESSAGE_SIZE + ODID_MESSAGE_SIZE])
 
 def print_basicID(payload):
-	IDType = payload[1] >> 4
-	UAType = payload[1] & 0x0F
-	UASID = payload[2:2 + ODID_ID_SIZE]
+    IDType = payload[1] >> 4
+    UAType = payload[1] & 0x0F
+    UASID = payload[2:2 + ODID_ID_SIZE]
 
-	print("UAType: %s" % decode_basicID_UA_type(UAType))
-	print("IDType: %s" % decode_basicID_ID_type(IDType))
-	print("UASID: %s" % clean_SN(clean_id(UASID)))
+    print("UAType: %s" % decode_basicID_UA_type(UAType))
+    print("IDType: %s" % decode_basicID_ID_type(IDType))
+    print("UASID: %s" % clean_SN(clean_id(UASID)))
 
 def print_location(payload):
-	Status = (payload[1] >> 4) & 0x0F
-	SpeedMult = payload[1] & 0x01
-	EWDirection = (payload[1] >> 1) & 0x01
-	HeightType = (payload[1] >> 2) & 0x01
-	Direction = payload[2] + 180*EWDirection # direction is encoded as 0-179 plus an east/west flag
-	SpeedHorizontal = payload[3]
-	SpeedVertical = struct.unpack('b', bytes(payload[4:5]))[0]*0.5 # signed value
-	if SpeedVertical == 63:
-		SpeedVertical = float('NaN')
+    Status = (payload[1] >> 4) & 0x0F
+    SpeedMult = payload[1] & 0x01
+    EWDirection = (payload[1] >> 1) & 0x01
+    HeightType = (payload[1] >> 2) & 0x01
+    Direction = payload[2] + 180*EWDirection # direction is encoded as 0-179 plus an east/west flag
+    SpeedHorizontal = payload[3]
+    SpeedVertical = struct.unpack('b', bytes(payload[4:5]))[0]*0.5 # signed value
+    if SpeedVertical == 63:
+        SpeedVertical = float('NaN')
 
-	Latitude = int(struct.unpack('<i', bytes(payload)[5:9])[0])
-	Longitude = int(struct.unpack('<i', bytes(payload)[9:13])[0])
-	AltitudeBaro = struct.unpack('<H', bytes(payload)[13:15])
-	AltitudeGeo = struct.unpack('<H', bytes(payload)[15:17])
-	Height = struct.unpack('<H', bytes(payload)[17:19])
-	HorizAccuracy = payload[19] & 0x0F
-	VertAccuracy = (payload[19] >> 4)& 0x0F
-	BaroAccuracy = (payload[20] >> 4)& 0x0F
-	SpeedAccuracy = payload[20] & 0x0F
-	TimeStamp = struct.unpack('<H', bytes(payload[21:23]))
-	TSAccuracy = payload[23] & 0x0F
+    Latitude = int(struct.unpack('<i', bytes(payload)[5:9])[0])
+    Longitude = int(struct.unpack('<i', bytes(payload)[9:13])[0])
+    AltitudeBaro = struct.unpack('<H', bytes(payload)[13:15])
+    AltitudeGeo = struct.unpack('<H', bytes(payload)[15:17])
+    Height = struct.unpack('<H', bytes(payload)[17:19])
+    HorizAccuracy = payload[19] & 0x0F
+    VertAccuracy = (payload[19] >> 4)& 0x0F
+    BaroAccuracy = (payload[20] >> 4)& 0x0F
+    SpeedAccuracy = payload[20] & 0x0F
+    TimeStamp = struct.unpack('<H', bytes(payload[21:23]))
+    TSAccuracy = payload[23] & 0x0F
 
-	print("Status: %s" % decode_location_status(Status))
-	print("Speed Mult: %i" % SpeedMult)
-	print("EW Direction: %i" % EWDirection)
-	print("Height Type: %s" % decode_location_height_type(HeightType))
-	print("Direction: %i" % Direction)
-	print("Speed Horizontal: %2.1f" % location_decode_speed_horizontal(SpeedHorizontal, SpeedMult))
-	print("Speed Vertical: %2.1f" % SpeedVertical)
-	print("Latitude: %2.7f" % (float(Latitude)/(10*1000*1000)))
-	print("Longitude: %2.7f" % (float(Longitude)/(10*1000*1000)))
-	print("Altitude Baro: %2.1f" % ((int(AltitudeBaro[0]) - int(2000))/2))
-	print("Altitude Geo: %2.1f" % ((int(AltitudeGeo[0]) - int(2000))/2))
-	print("Height: %2.1f" % ((int(Height[0]) - int(2000))/2))
-	print("Horiz Accuracy: %i" % int(HorizAccuracy))
-	print("Vert Accuracy: %i" % int(VertAccuracy))
-	print("Speed Accuracy: %i" % int(SpeedAccuracy))
-	print("Timestamp: %s" % decode_location_timestamp(TimeStamp))
-	print("Timestamp Accuracy: %i" % int(TSAccuracy))
+    print("Status: %s" % decode_location_status(Status))
+    print("Speed Mult: %i" % SpeedMult)
+    print("EW Direction: %i" % EWDirection)
+    print("Height Type: %s" % decode_location_height_type(HeightType))
+    print("Direction: %i" % Direction)
+    print("Speed Horizontal: %2.1f" % location_decode_speed_horizontal(SpeedHorizontal, SpeedMult))
+    print("Speed Vertical: %2.1f" % SpeedVertical)
+    print("Latitude: %2.7f" % (float(Latitude)/(10*1000*1000)))
+    print("Longitude: %2.7f" % (float(Longitude)/(10*1000*1000)))
+    print("Altitude Baro: %2.1f" % ((int(AltitudeBaro[0]) - int(2000))/2))
+    print("Altitude Geo: %2.1f" % ((int(AltitudeGeo[0]) - int(2000))/2))
+    print("Height: %2.1f" % ((int(Height[0]) - int(2000))/2))
+    print("Horiz Accuracy: %i" % int(HorizAccuracy))
+    print("Vert Accuracy: %i" % int(VertAccuracy))
+    print("Speed Accuracy: %i" % int(SpeedAccuracy))
+    print("Timestamp: %s" % decode_location_timestamp(TimeStamp))
+    print("Timestamp Accuracy: %i" % int(TSAccuracy))
 
 def print_auth(payload):
-	#todo
-	print("todo")
+    #todo
+    print("todo")
 
 def print_selfID(payload):
-	selfID_type = payload[1]
-	selfID_text = payload[2:2 + ODID_STR_SIZE]
+    selfID_type = payload[1]
+    selfID_text = payload[2:2 + ODID_STR_SIZE]
 
-	print("Type: %s" % decode_selfID_type(selfID_type))
-	print("Text: %s" % clean_id(selfID_text))
+    print("Type: %s" % decode_selfID_type(selfID_type))
+    print("Text: %s" % clean_id(selfID_text))
 
 def print_system(payload):
-	flags = payload[1]
-	classification_type = (flags >> 2) & 0x07
-	operator_location_type = flags & 0x03
-	OperatorLatitude = int(struct.unpack('<i', bytes(payload)[2:6])[0])
-	OperatorLongitude = int(struct.unpack('<i', bytes(payload)[6:10])[0])
-	AreaCount = struct.unpack('<H', bytes(payload[10:12]))[0]
-	AreaRadius = int(payload[12])*10 # encoded in steps of 10 m
-	AreaCeiling = struct.unpack('<H', bytes(payload[13:15]))
-	AreaFloor = struct.unpack('<H', bytes(payload[15:17]))
-	UA_category = (payload[17] >> 4) & 0x0F
-	UA_class = payload[17] & 0x0F
-	OperatordAltitude = struct.unpack('<H', bytes(payload)[18:20])
-	TimeStamp = struct.unpack('<I', bytes(payload[20:24]))
+    flags = payload[1]
+    classification_type = (flags >> 2) & 0x07
+    operator_location_type = flags & 0x03
+    OperatorLatitude = int(struct.unpack('<i', bytes(payload)[2:6])[0])
+    OperatorLongitude = int(struct.unpack('<i', bytes(payload)[6:10])[0])
+    AreaCount = struct.unpack('<H', bytes(payload[10:12]))[0]
+    AreaRadius = int(payload[12])*10 # encoded in steps of 10 m
+    AreaCeiling = struct.unpack('<H', bytes(payload[13:15]))
+    AreaFloor = struct.unpack('<H', bytes(payload[15:17]))
+    UA_category = (payload[17] >> 4) & 0x0F
+    UA_class = payload[17] & 0x0F
+    OperatordAltitude = struct.unpack('<H', bytes(payload)[18:20])
+    TimeStamp = struct.unpack('<I', bytes(payload[20:24]))
 
-	print("Classification Type: %s" % decode_system_classification_type(classification_type))
-	print("Operator Location Type: %s" % decode_system_operator_location_type(operator_location_type))
-	print("Operator Latitude: %2.7f" % (float(OperatorLatitude)/(10*1000*1000)))
-	print("Operator Longitude: %2.7f" % (float(OperatorLongitude)/(10*1000*1000)))
-	print("Area Count: %i" % AreaCount)
-	print("Area Radius: %i" % AreaRadius)
-	print("Area Ceiling: %2.1f" % ((int(AreaCeiling[0]) - int(2000))/2))
-	print("Area Floor: %2.1f" % ((int(AreaFloor[0]) - int(2000))/2))
-	print("UA category: %s" % decode_system_ua_category(UA_category))
-	print("UA class: %s" % decode_system_ua_class(UA_class))
-	print("Operator Altitude: %2.1f" % ((int(OperatordAltitude[0]) - int(2000))/2))
-	print("Timestamp: %s" % decode_system_timestamp(TimeStamp))
+    print("Classification Type: %s" % decode_system_classification_type(classification_type))
+    print("Operator Location Type: %s" % decode_system_operator_location_type(operator_location_type))
+    print("Operator Latitude: %2.7f" % (float(OperatorLatitude)/(10*1000*1000)))
+    print("Operator Longitude: %2.7f" % (float(OperatorLongitude)/(10*1000*1000)))
+    print("Area Count: %i" % AreaCount)
+    print("Area Radius: %i" % AreaRadius)
+    print("Area Ceiling: %2.1f" % ((int(AreaCeiling[0]) - int(2000))/2))
+    print("Area Floor: %2.1f" % ((int(AreaFloor[0]) - int(2000))/2))
+    print("UA category: %s" % decode_system_ua_category(UA_category))
+    print("UA class: %s" % decode_system_ua_class(UA_class))
+    print("Operator Altitude: %2.1f" % ((int(OperatordAltitude[0]) - int(2000))/2))
+    print("Timestamp: %s" % decode_system_timestamp(TimeStamp))
 
 def print_operatorID(payload):
-	operatorID_type = payload[1]
-	operatorID = payload[2:2 + ODID_ID_SIZE]
+    operatorID_type = payload[1]
+    operatorID = payload[2:2 + ODID_ID_SIZE]
 
-	print("Type: %s" % decode_operatorID_type(operatorID_type))
-	print("Text: %s" % clean_id(operatorID))
+    print("Type: %s" % decode_operatorID_type(operatorID_type))
+    print("Text: %s" % clean_id(operatorID))
 
 #removes characters like \t \n \r space from string
 def clean_SN(string):
@@ -369,7 +369,7 @@ def decode_system_timestamp(timestamp):
 
 def location_decode_speed_horizontal(speed_enc, speed_mult):
     if speed_enc == 255:
-	    return float('NaN')
+        return float('NaN')
     speed_enc = float (speed_enc)
     if speed_mult == 1:
         return float ((float(speed_enc) * 0.75) + (255 * 0.25))

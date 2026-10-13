@@ -106,7 +106,7 @@ def print_location(payload):
 	HeightType = (payload[1] >> 2) & 0x01
 	Direction = payload[2] + 180*EWDirection # direction is encoded as 0-179 plus an east/west flag
 	SpeedHorizontal = payload[3]
-	SpeedVertical = int(payload[4])*0.5
+	SpeedVertical = struct.unpack('b', bytes(payload[4:5]))[0]*0.5 # signed value
 	if SpeedVertical == 63:
 		SpeedVertical = float('NaN')
 

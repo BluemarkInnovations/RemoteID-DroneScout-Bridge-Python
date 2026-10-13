@@ -49,42 +49,15 @@ def write_csv(payload, size, filename, rx=None):
         csv_writer = csv.writer(csvfile, delimiter=',',
                                 quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
         Detection_Time = datetime.now(tz=timezone.utc).strftime('%Y-%m-%d %H:%M:%S') + " UTC"
-        IDType = ''
-        UAType = ''
-        UASID = ''
-        Latitude = ''
-        Longitude = ''
-        AltitudeGeo = ''
-        Height = ''
-        OperatorLatitude = ''
-        OperatorLongitude = ''
-        OperatorAltitudeGeo = ''
-        TimeStamp = ''
-        operatorID = ''
 
-        for x in range(min(size, odid.ODID_PACK_MAX_MESSAGES)):
-            RIDtype = payload[x*odid.ODID_MESSAGE_SIZE] >> 4
-            if (RIDtype == odid.ODID_MESSAGETYPE.ODID_MESSAGETYPE_BASIC_ID):
-                IDType = payload[x*odid.ODID_MESSAGE_SIZE + 1] >> 4
-                UAType = payload[x*odid.ODID_MESSAGE_SIZE + 1] & 0x0F
-                UASID = odid.clean_SN(odid.clean_id(payload[x*odid.ODID_MESSAGE_SIZE + 2: x*odid.ODID_MESSAGE_SIZE + 2 + odid.ODID_ID_SIZE]))
+        pack = odid.decode_message_pack(payload, size)
+        basicID = pack.get(odid.ODID_MESSAGETYPE.ODID_MESSAGETYPE_BASIC_ID, {})
+        location = pack.get(odid.ODID_MESSAGETYPE.ODID_MESSAGETYPE_LOCATION, {})
+        system = pack.get(odid.ODID_MESSAGETYPE.ODID_MESSAGETYPE_SYSTEM, {})
+        operatorID = pack.get(odid.ODID_MESSAGETYPE.ODID_MESSAGETYPE_OPERATOR_ID, {})
 
-            if (RIDtype == odid.ODID_MESSAGETYPE.ODID_MESSAGETYPE_LOCATION):
-                Latitude = float(struct.unpack('<i', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 5: x*odid.ODID_MESSAGE_SIZE + 9])[0])/(10*1000*1000)
-                Longitude = float(struct.unpack('<i', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 9: x*odid.ODID_MESSAGE_SIZE + 13])[0])/(10*1000*1000)
-                AltitudeGeo = struct.unpack('<H', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 15:x*odid.ODID_MESSAGE_SIZE + 17])
-                AltitudeGeo = (int(AltitudeGeo[0]) - int(2000))/2
-                Height = struct.unpack('<H', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 17:x*odid.ODID_MESSAGE_SIZE + 19])
-                Height = (int(Height[0]) - int(2000))/2
-
-            if (RIDtype == odid.ODID_MESSAGETYPE.ODID_MESSAGETYPE_SYSTEM):
-                OperatorLatitude = float(struct.unpack('<i', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 2: x*odid.ODID_MESSAGE_SIZE + 6])[0])/(10*1000*1000)
-                OperatorLongitude = float(struct.unpack('<i', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 6: x*odid.ODID_MESSAGE_SIZE + 10])[0])/(10*1000*1000)
-                OperatorAltitudeGeo = struct.unpack('<H', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 18:x*odid.ODID_MESSAGE_SIZE + 20])
-                OperatorAltitudeGeo = (int(OperatorAltitudeGeo[0]) - int(2000))/2
-
-            if (RIDtype == odid.ODID_MESSAGETYPE.ODID_MESSAGETYPE_OPERATOR_ID):
-                operatorID = odid.clean_id(payload[x*odid.ODID_MESSAGE_SIZE + 2:x*odid.ODID_MESSAGE_SIZE + 2 + odid.ODID_ID_SIZE])
-
-        csv_writer.writerow([Detection_Time, UASID, IDType, UAType, Latitude, Longitude, AltitudeGeo, Height,
-            OperatorLatitude, OperatorLongitude, OperatorAltitudeGeo, operatorID] + rx_columns(rx))
+        csv_writer.writerow([Detection_Time,
+            basicID.get('uas_id', ''), basicID.get('id_type', ''), basicID.get('ua_type', ''),
+            location.get('latitude', ''), location.get('longitude', ''), location.get('altitude_geo', ''), location.get('height', ''),
+            system.get('operator_latitude', ''), system.get('operator_longitude', ''), system.get('operator_altitude', ''),
+            operatorID.get('operator_id', '')] + rx_columns(rx))

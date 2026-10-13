@@ -58,43 +58,26 @@ def export(payload, size):
     except NameError:
         pass
     else:
-        IDType = 0
-        UASID = ''
-        Status = 0
         Emergency_flag = 0
         Is_on_ground_flag = 1
-        SpeedMult = 0
-        Latitude = 0
-        Longitude = 0
-        AltitudeGeo = 0
-        AltitudeGeo = 0
-        Direction = 0
-        SpeedHorizontal = 0
-        BasicIDpresent = 0
-        Locationpresent = 0
-        for x in range(min(size, odid.ODID_PACK_MAX_MESSAGES)):
-            RIDtype = payload[x*odid.ODID_MESSAGE_SIZE] >> 4
-            if (RIDtype == odid.ODID_MESSAGETYPE.ODID_MESSAGETYPE_BASIC_ID):
-                BasicIDpresent = 1
-                IDType = int(payload[x*odid.ODID_MESSAGE_SIZE + 1] >> 4)
-                UASID = (payload[x*odid.ODID_MESSAGE_SIZE + 2: x*odid.ODID_MESSAGE_SIZE + 2 + odid.ODID_ID_SIZE])
-                UASID = odid.clean_SN(odid.clean_id(UASID))
-                output_str = ""
 
-            if (RIDtype == odid.ODID_MESSAGETYPE.ODID_MESSAGETYPE_LOCATION):
-                Locationpresent = 1
-                Status = (payload[x*odid.ODID_MESSAGE_SIZE + 1] >> 4) & 0x0F
-                SpeedMult = payload[x*odid.ODID_MESSAGE_SIZE + 1] & 0x01
-                Latitude = float(struct.unpack('<i', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 5: x*odid.ODID_MESSAGE_SIZE + 9])[0])/(10*1000*1000)
-                Longitude = float(struct.unpack('<i', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 9: x*odid.ODID_MESSAGE_SIZE + 13])[0])/(10*1000*1000)
-                AltitudeGeo = struct.unpack('<H', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 15:x*odid.ODID_MESSAGE_SIZE + 17])
-                AltitudeGeo = (int(AltitudeGeo[0]) - int(2000))/2
-                EWDirection = (payload[x*odid.ODID_MESSAGE_SIZE + 1] >> 1) & 0x01
-                Direction = int(payload[x*odid.ODID_MESSAGE_SIZE + 2]) + 180*EWDirection
-                if Direction > 360 or Direction < 0:
-                    Direction = 0.0
-
-                SpeedHorizontal = odid.location_decode_speed_horizontal(payload[x*odid.ODID_MESSAGE_SIZE + 3], SpeedMult)
+        pack = odid.decode_message_pack(payload, size)
+        basicID = pack.get(odid.ODID_MESSAGETYPE.ODID_MESSAGETYPE_BASIC_ID)
+        location = pack.get(odid.ODID_MESSAGETYPE.ODID_MESSAGETYPE_LOCATION)
+        BasicIDpresent = 1 if basicID else 0
+        Locationpresent = 1 if location else 0
+        if basicID:
+            IDType = basicID['id_type']
+            UASID = basicID['uas_id']
+        if location:
+            Status = location['status']
+            Latitude = location['latitude']
+            Longitude = location['longitude']
+            AltitudeGeo = location['altitude_geo']
+            SpeedHorizontal = location['speed_horizontal']
+            Direction = location['direction']
+            if Direction > 360 or Direction < 0:
+                Direction = 0.0
 
         # decode the entire message pack, now create SBS messages
         if BasicIDpresent == 1:

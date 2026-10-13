@@ -52,7 +52,7 @@ RX_INFO_MAX_AGE = 2.0       # seconds; older RX info is not attached to a pack
 while True:
     try:
         msg = master.recv_match()
-    except:
+    except Exception:
         msg = None # don't process the previous message again
     if not msg:
         time.sleep(0.1)
@@ -101,5 +101,5 @@ while True:
         if hasattr(config, 'sbs_server_ip_address'):
             try:
                 sbs.export(msg.messages, msg.msg_pack_size)
-            except:
+            except Exception:
                 pass

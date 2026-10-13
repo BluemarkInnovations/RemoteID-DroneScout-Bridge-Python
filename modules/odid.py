@@ -276,12 +276,13 @@ def decode_location_status(status):
     return string
 
 def decode_location_timestamp(timestamp):
-    string = ""
-    timestamp = int(timestamp[0])
-    minutes = int(timestamp/10/60)
-    seconds = int((timestamp - minutes*60*10)/10)
-    seconds_decimals = int((timestamp - minutes*60*10)/10 - seconds)
-    string = str(f"{minutes:02}") + ":" + str(f"{seconds:02}") + "." + str(f"{seconds_decimals:02}")
+    string = "unknown"
+    timestamp = int(timestamp[0]) # tenths of seconds since the full hour
+    if timestamp != 0xFFFF:
+        minutes = timestamp // 600
+        seconds = (timestamp % 600) // 10
+        tenths = timestamp % 10
+        string = f"{minutes:02}:{seconds:02}.{tenths}"
 
     return string
 

@@ -1,4 +1,5 @@
 import csv
+import os
 from enum import Enum
 from datetime import datetime, timezone
 from bitstruct import *
@@ -10,7 +11,8 @@ RX_HEADER = ['RadioTechnology', 'MAC', 'Channel', 'RSSI', 'Counter', 'ReceiverID
 
 def open_csv(log_path):
 
-    filename = log_path + '/' + datetime.now(tz=timezone.utc).strftime('%Y-%m-%d %H:%M:%S') + '_remoteID_log.csv'
+    # no colons or spaces in the filename; colons are not allowed on Windows
+    filename = os.path.join(log_path, datetime.now(tz=timezone.utc).strftime('%Y-%m-%d_%H-%M-%S') + '_remoteID_log.csv')
     with open(filename, 'a', newline='', encoding='utf-8') as csvfile:
         csv_writer = csv.writer(csvfile, delimiter=',',
                                 quotechar='"', quoting=csv.QUOTE_NONNUMERIC)

@@ -340,9 +340,8 @@ def decode_system_ua_class(ua_class):
     return SYSTEM_UA_CLASS.get(ua_class, "")
 
 def decode_system_timestamp(timestamp):
-    string = ""
     timestamp = timestamp + 1546300800 # add 01/01/2019
-    string = datetime.datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S') + " UTC"
+    string = datetime.datetime.fromtimestamp(timestamp, tz=datetime.timezone.utc).strftime('%Y-%m-%d %H:%M:%S') + " UTC"
 
     return string
 

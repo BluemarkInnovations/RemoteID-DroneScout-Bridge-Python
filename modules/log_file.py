@@ -60,7 +60,7 @@ def write_csv(payload, size, filename, rx=None):
         TimeStamp = ''
         operatorID = ''
 
-        for x in range(size):
+        for x in range(min(size, odid.ODID_PACK_MAX_MESSAGES)):
             RIDtype = payload[x*odid.ODID_MESSAGE_SIZE] >> 4
             if (RIDtype == odid.ODID_MESSAGETYPE.ODID_MESSAGETYPE_BASIC_ID):
                 IDType = payload[x*odid.ODID_MESSAGE_SIZE + 1] >> 4

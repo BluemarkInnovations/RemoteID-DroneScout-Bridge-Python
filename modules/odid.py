@@ -47,10 +47,11 @@ class ODID_MESSAGETYPE(IntEnum):
 ODID_ID_SIZE = 20
 ODID_STR_SIZE = 23
 ODID_MESSAGE_SIZE = 25
+ODID_PACK_MAX_MESSAGES = 9 # a MAVLink message pack holds at most 9 messages (225 bytes)
 
 def print_message_pack(payload, size):
 
-	for x in range(size):
+	for x in range(min(size, ODID_PACK_MAX_MESSAGES)):
 		RIDtype = payload[x*ODID_MESSAGE_SIZE] >> 4
 		ProtoVersion = payload[x*ODID_MESSAGE_SIZE] & 0x0F
 		if (RIDtype == ODID_MESSAGETYPE.ODID_MESSAGETYPE_BASIC_ID):

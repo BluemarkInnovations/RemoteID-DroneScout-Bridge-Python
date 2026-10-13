@@ -72,7 +72,7 @@ def export(payload, size):
         SpeedHorizontal = 0
         BasicIDpresent = 0
         Locationpresent = 0
-        for x in range(size):
+        for x in range(min(size, odid.ODID_PACK_MAX_MESSAGES)):
             RIDtype = payload[x*odid.ODID_MESSAGE_SIZE] >> 4
             if (RIDtype == odid.ODID_MESSAGETYPE.ODID_MESSAGETYPE_BASIC_ID):
                 BasicIDpresent = 1

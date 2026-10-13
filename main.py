@@ -20,6 +20,10 @@ def extend_dialect(ext):
     """Add messages and enums from a small generated dialect to the active pymavlink dialect."""
     base = mavutil.mavlink
     for msgid, cls in ext.mavlink_map.items():
+        # don't silently replace a different message that uses the same ID
+        if msgid in base.mavlink_map and base.mavlink_map[msgid].msgname != cls.msgname:
+            raise RuntimeError("MAVLink message ID %u (%s) is already used by %s"
+                               % (msgid, cls.msgname, base.mavlink_map[msgid].msgname))
         base.mavlink_map[msgid] = cls
         setattr(base, 'MAVLINK_MSG_ID_' + cls.msgname, msgid)
     for enum_name, entries in ext.enums.items():

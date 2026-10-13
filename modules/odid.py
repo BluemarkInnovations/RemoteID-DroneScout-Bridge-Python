@@ -3,6 +3,37 @@ from bitstruct import *
 from enum import Enum
 import datetime
 
+from modules import rid
+
+def print_rx_information(msg):
+    # radio technology name, without the long enum prefix
+    tech = rid.enums['MAV_ODID_RADIO_TECHNOLOGY'].get(msg.radio_technology)
+    tech_name = tech.name.replace('MAV_ODID_RADIO_TECHNOLOGY_', '') if tech else "UNKNOWN (%u)" % msg.radio_technology
+
+    # Bluetooth and WLAN receptions carry a MAC address; otherwise try to show it as an ID string
+    mac_techs = (rid.MAV_ODID_RADIO_TECHNOLOGY_BLE_LEGACY, rid.MAV_ODID_RADIO_TECHNOLOGY_BLE_LR,
+                 rid.MAV_ODID_RADIO_TECHNOLOGY_WLAN_BEACON, rid.MAV_ODID_RADIO_TECHNOLOGY_WLAN_NAN)
+    if msg.radio_technology in mac_techs:
+        id_or_mac = ':'.join('%02X' % b for b in msg.id_or_mac[:6])
+    else:
+        id_or_mac = bytes(msg.id_or_mac).split(b'\x00', 1)[0].decode('ascii', errors='replace')
+
+    rssi = "unknown" if msg.rssi == 127 else "%d dBm" % msg.rssi
+    channel = "unknown" if msg.channel == 0 else "%u" % msg.channel
+    msg_id = "none" if msg.msg_id == 0 else "%u" % msg.msg_id
+    time_usec = "unknown" if msg.time_usec == 0 else "%u us" % msg.time_usec
+
+    print("ID/MAC:\t\t\t%s" % id_or_mac)
+    print("Radio technology:\t%s" % tech_name)
+    print("Channel:\t\t%s" % channel)
+    print("RSSI:\t\t\t%s" % rssi)
+    print("Counter:\t\t%u" % msg.counter)
+    print("Related MAVLink msg ID:\t%s" % msg_id)
+    print("Receiver ID:\t\t%u" % msg.receiver_id)
+    print("Timestamp:\t\t%s" % time_usec)
+    print("Brand:\t\t\t%s" % (msg.brand if msg.brand else "unknown"))
+    print("Model:\t\t\t%s" % (msg.model if msg.model else "unknown"))
+
 #define MAVLink messages types
 class ODID_MESSAGETYPE(Enum):
     ODID_MESSAGETYPE_BASIC_ID = 0

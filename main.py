@@ -53,7 +53,7 @@ while True:
     try:
         msg = master.recv_match()
     except:
-        pass
+        msg = None # don't process the previous message again
     if not msg:
         time.sleep(0.1)
         continue

@@ -64,3 +64,12 @@ Note: for exporting data, the normal Serial Number of RemoteID is too long. It i
 
 ![RemoteID_data_in_Virtual_Radar_Server](./img/virtual_radar_server.jpg)
 
+
+
+
+## Tests
+Run the unit tests from the repository root (no hardware needed):
+
+```
+python3 -m unittest
+```

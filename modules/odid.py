@@ -235,72 +235,49 @@ def clean_id(raw):
     raw = bytes(raw).split(b'\x00', 1)[0]
     return ''.join(chr(b) for b in raw if 32 <= b < 127)
 
-def decode_basicID_ID_type(IDType):
-    string = ""
-    if IDType == 0:
-        string = "None"
-    elif IDType == 1:
-        string = "Serial Number"
-    elif IDType == 2:
-        string = "CAA Registration ID"
-    elif IDType == 3:
-        string = "UTM Assigned UUID"
-    elif IDType == 4:
-        string = "specific session ID"
+BASICID_ID_TYPE = {
+    0: "None",
+    1: "Serial Number",
+    2: "CAA Registration ID",
+    3: "UTM Assigned UUID",
+    4: "specific session ID",
+}
 
-    return string
+def decode_basicID_ID_type(IDType):
+    return BASICID_ID_TYPE.get(IDType, "")
+
+BASICID_UA_TYPE = {
+    0: "None",
+    1: "Aeroplane",
+    2: "Helicopter (or Multirotor)",
+    3: "Gyroplane",
+    4: "Hybrid Lift",
+    5: "Ornithopter",
+    6: "Glider",
+    7: "Kite",
+    8: "Free Balloon",
+    9: "Captive Balloon",
+    10: "Airship (such as a blimp)",
+    11: "Free Fall/Parachute (unpowered)",
+    12: "Rocket",
+    13: "Tethered Powered Aircraft",
+    14: "Ground Obstacle",
+    15: "Other",
+}
 
 def decode_basicID_UA_type(UAType):
-    string = ""
-    if UAType == 0:
-        string = "None"
-    elif UAType == 1:
-        string = "Aeroplane"
-    elif UAType == 2:
-        string = "Helicopter (or Multirotor)"
-    elif UAType == 3:
-        string = "Gyroplane"
-    elif UAType == 4:
-        string = "Hybrid Lift"
-    elif UAType == 5:
-        string = "Ornithopter"
-    elif UAType == 6:
-        string = "Glider"
-    elif UAType == 7:
-        string = "Kite"
-    elif UAType == 8:
-        string = "Free Balloon"
-    elif UAType == 9:
-        string = "Captive Balloon"
-    elif UAType == 10:
-        string = "Airship (such as a blimp)"
-    elif UAType == 11:
-        string = "Free Fall/Parachute (unpowered)"
-    elif UAType == 12:
-        string = "Rocket"
-    elif UAType == 13:
-        string = "Tethered Powered Aircraft"
-    elif UAType == 14:
-        string = "Ground Obstacle"
-    elif UAType == 15:
-        string = "Other"
+    return BASICID_UA_TYPE.get(UAType, "")
 
-    return string
+LOCATION_STATUS = {
+    0: "Undeclared",
+    1: "Ground",
+    2: "Airborne",
+    3: "Emergency",
+    4: "Remote ID System Failure",
+}
 
 def decode_location_status(status):
-    string = ""
-    if status == 0:
-        string = "Undeclared"
-    elif status == 1:
-        string = "Ground"
-    elif status == 2:
-        string = "Airborne"
-    elif status == 3:
-        string = "Emergency"
-    elif status == 4:
-        string = "Remote ID System Failure"
-
-    return string
+    return LOCATION_STATUS.get(status, "")
 
 def decode_location_timestamp(timestamp):
     string = "unknown"
@@ -312,79 +289,63 @@ def decode_location_timestamp(timestamp):
 
     return string
 
-def decode_location_height_type(height_type):
-    string = ""
-    if height_type == 0:
-        string = "Above Takeoff"
-    elif height_type == 1:
-        string = "Above Ground Level"
+LOCATION_HEIGHT_TYPE = {
+    0: "Above Takeoff",
+    1: "Above Ground Level",
+}
 
-    return string
+def decode_location_height_type(height_type):
+    return LOCATION_HEIGHT_TYPE.get(height_type, "")
+
+SELFID_TYPE = {
+    0: "Text",
+    1: "Emergency",
+    2: "Extended Status",
+}
 
 def decode_selfID_type(selfID_type):
-    string = ""
-    if selfID_type == 0:
-        string = "Text"
-    elif selfID_type == 1:
-        string = "Emergency"
-    elif selfID_type == 2:
-        string = "Extended Status"
+    return SELFID_TYPE.get(selfID_type, "")
 
-    return string
+SYSTEM_CLASSIFICATION_TYPE = {
+    0: "Undeclared",
+    1: "European Union",
+}
 
 def decode_system_classification_type(system_classification_type):
-    string = ""
-    if system_classification_type == 0:
-        string = "Undeclared"
-    elif system_classification_type == 1:
-        string = "European Union"
+    return SYSTEM_CLASSIFICATION_TYPE.get(system_classification_type, "")
 
-    return string
+SYSTEM_OPERATOR_LOCATION_TYPE = {
+    0: "Take Off",
+    1: "Dynamic",
+    2: "Fixed",
+}
 
 def decode_system_operator_location_type(operator_location_type):
-    string = ""
-    if operator_location_type == 0:
-        string = "Take Off"
-    elif operator_location_type == 1:
-        string = "Dynamic"
-    elif operator_location_type == 2:
-        string = "Fixed"
+    return SYSTEM_OPERATOR_LOCATION_TYPE.get(operator_location_type, "")
 
-    return string
+SYSTEM_UA_CATEGORY = {
+    0: "Undefined",
+    1: "Open",
+    2: "Specific",
+    3: "Certified",
+}
 
 def decode_system_ua_category(ua_category):
-    string = ""
-    if ua_category == 0:
-        string = "Undefined"
-    elif ua_category == 1:
-        string = "Open"
-    elif ua_category == 2:
-        string = "Specific"
-    elif ua_category == 3:
-        string = "Certified"
+    return SYSTEM_UA_CATEGORY.get(ua_category, "")
 
-    return string
+SYSTEM_UA_CLASS = {
+    0: "Undefined",
+    1: "Class 0",
+    2: "Class 1",
+    3: "Class 2",
+    4: "Class 3",
+    5: "Class 4",
+    6: "Class 5",
+    7: "Class 6",
+}
 
 def decode_system_ua_class(ua_class):
-    string = ""
-    if ua_class == 0:
-        string = "Undefined"
-    elif ua_class == 1:
-        string = "Class 0"
-    elif ua_class == 2:
-        string = "Class 1"
-    elif ua_class == 3:
-        string = "Class 2"
-    elif ua_class == 4:
-        string = "Class 3"
-    elif ua_class == 5:
-        string = "Class 4"
-    elif ua_class == 6:
-        string = "Class 5"
-    elif ua_class == 7:
-        string = "Class 6"
-
-    return string
+    return SYSTEM_UA_CLASS.get(ua_class, "")
 
 def decode_system_timestamp(timestamp):
     string = ""
@@ -402,9 +363,9 @@ def location_decode_speed_horizontal(speed_enc, speed_mult):
     else:
         return speed_enc * 0.75
 
-def decode_operatorID_type(operatorID_type):
-    string = ""
-    if operatorID_type == 0:
-        string = "Operator ID"
+OPERATORID_TYPE = {
+    0: "Operator ID",
+}
 
-    return string
+def decode_operatorID_type(operatorID_type):
+    return OPERATORID_TYPE.get(operatorID_type, "")

@@ -78,7 +78,7 @@ def write_csv(payload, size, filename, rx=None):
             if (RIDtype == odid.ODID_MESSAGETYPE.ODID_MESSAGETYPE_SYSTEM):
                 OperatorLatitude = float(struct.unpack('<i', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 2: x*odid.ODID_MESSAGE_SIZE + 6])[0])/(10*1000*1000)
                 OperatorLongitude = float(struct.unpack('<i', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 6: x*odid.ODID_MESSAGE_SIZE + 10])[0])/(10*1000*1000)
-                OperatorAltitudeGeo = struct.unpack('<h', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 18:x*odid.ODID_MESSAGE_SIZE + 20])
+                OperatorAltitudeGeo = struct.unpack('<H', bytes(payload)[x*odid.ODID_MESSAGE_SIZE + 18:x*odid.ODID_MESSAGE_SIZE + 20])
                 OperatorAltitudeGeo = (int(OperatorAltitudeGeo[0]) - int(2000))/2
 
             if (RIDtype == odid.ODID_MESSAGETYPE.ODID_MESSAGETYPE_OPERATOR_ID):

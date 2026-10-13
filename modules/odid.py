@@ -153,17 +153,17 @@ def print_selfID(payload):
 
 def print_system(payload):
 	flags = payload[1]
-	classification_type = (flags >> 2) & 0x03
+	classification_type = (flags >> 2) & 0x07
 	operator_location_type = flags & 0x03
 	OperatorLatitude = int(struct.unpack('<i', bytes(payload)[2:6])[0])
 	OperatorLongitude = int(struct.unpack('<i', bytes(payload)[6:10])[0])
 	AreaCount = struct.unpack('<H', bytes(payload[10:12]))[0]
-	AreaRadius = int(payload[12])
-	AreaCeiling = struct.unpack('<h', bytes(payload[13:15]))
-	AreaFloor = struct.unpack('<h', bytes(payload[15:17]))
+	AreaRadius = int(payload[12])*10 # encoded in steps of 10 m
+	AreaCeiling = struct.unpack('<H', bytes(payload[13:15]))
+	AreaFloor = struct.unpack('<H', bytes(payload[15:17]))
 	UA_category = (payload[17] >> 4) & 0x0F
 	UA_class = payload[17] & 0x0F
-	OperatordAltitude = struct.unpack('<h', bytes(payload)[18:20])
+	OperatordAltitude = struct.unpack('<H', bytes(payload)[18:20])
 	TimeStamp = struct.unpack('<I', bytes(payload[20:24]))
 
 	print("Classification Type: %s" % decode_system_classification_type(classification_type))
@@ -172,8 +172,8 @@ def print_system(payload):
 	print("Operator Longitude: %2.7f" % (float(OperatorLongitude)/(10*1000*1000)))
 	print("Area Count: %i" % AreaCount)
 	print("Area Radius: %i" % AreaRadius)
-	print("Area Ceiling: %i" % ((int(AreaCeiling[0]) - int(2000))/2))
-	print("Area Floor: %i" % ((int(AreaFloor[0]) - int(2000))/2))
+	print("Area Ceiling: %2.1f" % ((int(AreaCeiling[0]) - int(2000))/2))
+	print("Area Floor: %2.1f" % ((int(AreaFloor[0]) - int(2000))/2))
 	print("UA category: %s" % decode_system_ua_category(UA_category))
 	print("UA class: %s" % decode_system_ua_class(UA_class))
 	print("Operator Altitude: %2.1f" % ((int(OperatordAltitude[0]) - int(2000))/2))

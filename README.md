@@ -45,6 +45,8 @@ sudo pip3 install pymavlink
 
 In the config.py file, enter the correct settings for the ``interface``. If you want to save detected RemoteID signals to a CSV file, uncomment ``log_path``
 
+When ``log_path`` is set, MAVLink packets that could not be decoded are also logged, to a separate ``*_decode_errors.csv`` file. This covers packets with an invalid CRC or length, bytes outside a MAVLink packet, unknown message IDs and gaps in the MAVLink sequence numbers (lost packets). The raw bytes are saved as hex, which helps to diagnose corruption on the USB link.
+
 
 ## Usage
 Start the script to receive and show Remote ID signals of nearby drones.

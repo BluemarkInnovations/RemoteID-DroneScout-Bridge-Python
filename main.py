@@ -12,6 +12,7 @@ import threading
 from modules import odid # opendroneID functions
 from modules import adsb # ADSB vehicle functions
 from modules import log_file # log opendroneID data to a CSV file
+from modules import error_log # log packets that could not be decoded to a CSV file
 from modules import sbs # for SBS export
 from modules import rid # extra message definitions (generated from rid.xml without includes)
 
@@ -53,6 +54,9 @@ last_rx_info = {}           # id_or_mac -> (receive time, RX information message
 pending_packs = {}          # id_or_mac -> (receive time, message pack) waiting for RX information
 RX_INFO_MAX_AGE = 2.0       # seconds; older RX info is not attached to a pack
 filename = None             # CSV log file, created when the first pack is logged
+error_filename = None       # CSV log file for decode errors, created when the first error is logged
+bad_bytes = bytearray()     # consecutive bytes that are not part of a MAVLink packet
+mav_loss = 0                # packets lost so far according to the MAVLink sequence numbers
 
 def rx_matches(rx, pack):
     # RX information refers to the MAVLink message it belongs to by message ID
@@ -66,6 +70,23 @@ def log_pack(pack, rx):
     if filename is None:
         filename = log_file.open_csv(config.log_path)
     log_file.write_csv(pack.messages, pack.msg_pack_size, filename, rx)
+
+def log_decode_error(msg_type, reason, data=b''):
+    # report a packet that could not be decoded on the console and in the decode error CSV file
+    global error_filename
+    if config.print_messages == True:
+        print("\n%s Decode error in %s: %s (%u bytes)" % (time.strftime("%H:%M:%S"), msg_type, reason, len(data)))
+    if not hasattr(config, 'log_path'):
+        return
+    if error_filename is None:
+        error_filename = error_log.open_csv(config.log_path)
+    error_log.write_csv(error_filename, msg_type, reason, data)
+
+def flush_bad_bytes():
+    # pymavlink reports bytes outside a MAVLink packet one at a time; log them as one error
+    if bad_bytes:
+        log_decode_error('BAD_DATA', 'Bad prefix', bad_bytes)
+        bad_bytes.clear()
 
 while True:
     try:
@@ -83,10 +104,30 @@ while True:
         log_pack(pending_packs.pop(key)[1], None)
 
     if not msg:
+        flush_bad_bytes() # no more data, so a run of bad bytes has ended
         time.sleep(0.1)
         continue
     t = time.localtime()
     current_time = time.strftime("%H:%M:%S", t)
+
+    if msg.get_type() == 'BAD_DATA': # CRC error, invalid length or bytes outside a MAVLink packet
+        if msg.reason == 'Bad prefix':
+            bad_bytes.extend(msg.data)
+            continue
+        flush_bad_bytes()
+        log_decode_error('BAD_DATA', msg.reason, msg.data)
+        continue
+    flush_bad_bytes()
+
+    # pymavlink counts gaps in the sequence numbers; a corrupted packet often also swallows the next one
+    if getattr(master, 'mav_loss', 0) > mav_loss:
+        log_decode_error(msg.get_type(), "%u packet(s) lost before this one (sequence number gap)"
+                         % (master.mav_loss - mav_loss), msg.get_msgbuf())
+        mav_loss = master.mav_loss
+
+    if msg.get_type().startswith('UNKNOWN_'): # valid CRC, but a message ID that is not in the dialect
+        log_decode_error(msg.get_type(), "unknown MAVLink message ID", msg.get_msgbuf())
+        continue
 
     if msg.get_type() == 'HEARTBEAT':
 

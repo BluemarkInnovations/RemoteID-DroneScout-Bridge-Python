@@ -45,6 +45,32 @@ def rx_msg(n, rssi):
     return rid.MAVLink_open_drone_id_radio_rx_information_message(
         0, 0, mac(n), mavutil.mavlink.MAVLINK_MSG_ID_OPEN_DRONE_ID_MESSAGE_PACK, 1, 0, 7, 1, 37, rssi, b'b', b'm')
 
+def encode(msg, seq):
+    # returns the bytes of a MAVLink packet as sent by the bridge
+    mav = mavutil.mavlink.MAVLink(None, 1, 1)
+    mav.seq = seq
+    return bytes(msg.pack(mav))
+
+def heartbeat():
+    return mavutil.mavlink.MAVLink_heartbeat_message(6, 8, 0, 0, 0, 3)
+
+class StreamMaster:
+    # parses a byte stream with pymavlink, like a serial connection; stops when the stream is read twice
+    def __init__(self, connect, path):
+        self.conn = connect(path, notimestamps=True) # the real mavutil.mavlink_connection
+        self.empty = 0
+    def __getattr__(self, name):
+        return getattr(self.conn, name)
+    def wait_heartbeat(self):
+        pass
+    def recv_match(self):
+        msg = self.conn.recv_match()
+        if msg is None:
+            self.empty += 1
+            if self.empty > 1:
+                raise Stop()
+        return msg
+
 class TestMainLoop(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
@@ -74,6 +100,41 @@ class TestMainLoop(unittest.TestCase):
             return []
         with open(files[0], newline='', encoding='utf-8') as f:
             return list(csv.DictReader(f))
+
+    def run_stream(self, data):
+        # runs main.py on a MAVLink byte stream and returns the rows of the decode error log
+        path = os.path.join(self.tmp.name, 'stream.raw') # not .bin, which pymavlink opens as a DataFlash log
+        with open(path, 'wb') as f:
+            f.write(data)
+        mavutil.mavlink_connection = lambda *args, **kwargs: StreamMaster(self.saved_connection, path)
+        with self.assertRaises(Stop):
+            runpy.run_path(MAIN, run_name='__main__')
+        files = glob.glob(os.path.join(self.tmp.name, '*_decode_errors.csv'))
+        if not files:
+            return []
+        with open(files[0], newline='', encoding='utf-8') as f:
+            return list(csv.DictReader(f))
+
+    def test_valid_stream_has_no_decode_errors(self):
+        data = encode(heartbeat(), 0) + encode(pack_msg(1, b'SN1'), 1) + encode(heartbeat(), 2)
+        self.assertEqual(self.run_stream(data), [])
+
+    def test_corrupted_packets_are_logged(self):
+        corrupt = bytearray(encode(pack_msg(1, b'SN1'), 1))
+        corrupt[20] ^= 0xFF
+        data = encode(heartbeat(), 0) + bytes(corrupt) + b'junk' + encode(heartbeat(), 2)
+        rows = self.run_stream(data)
+        self.assertEqual([r['MessageType'] for r in rows], ['BAD_DATA', 'BAD_DATA', 'HEARTBEAT'])
+        self.assertIn('invalid MAVLink CRC', rows[0]['Reason'])
+        self.assertEqual(rows[0]['Data'], bytes(corrupt).hex(' '))
+        self.assertEqual((rows[1]['Reason'], rows[1]['Data']), ('Bad prefix', b'junk'.hex(' ')))
+        self.assertIn('1 packet(s) lost', rows[2]['Reason'])
+
+    def test_corrupted_pack_is_not_logged_as_detection(self):
+        corrupt = bytearray(encode(pack_msg(1, b'SN1'), 0))
+        corrupt[20] ^= 0xFF
+        self.run_stream(bytes(corrupt) + encode(heartbeat(), 1))
+        self.assertEqual(glob.glob(os.path.join(self.tmp.name, '*_remoteID_log.csv')), [])
 
     def test_rx_information_matched_in_any_order(self):
         rows = self.run_main([rx_msg(1, -40), pack_msg(1, b'RXFIRST'),

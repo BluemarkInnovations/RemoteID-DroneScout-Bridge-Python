@@ -340,8 +340,8 @@ MAV_ODID_RADIO_TECHNOLOGY_WLAN_BEACON = 3
 enums["MAV_ODID_RADIO_TECHNOLOGY"][3] = EnumEntry("MAV_ODID_RADIO_TECHNOLOGY_WLAN_BEACON", """OpenDroneID WLAN Beacon.""")
 MAV_ODID_RADIO_TECHNOLOGY_WLAN_NAN = 4
 enums["MAV_ODID_RADIO_TECHNOLOGY"][4] = EnumEntry("MAV_ODID_RADIO_TECHNOLOGY_WLAN_NAN", """OpenDroneID WLAN NAN.""")
-MAV_ODID_RADIO_TECHNOLOGY_WLAN_INFODRONE = 5
-enums["MAV_ODID_RADIO_TECHNOLOGY"][5] = EnumEntry("MAV_ODID_RADIO_TECHNOLOGY_WLAN_INFODRONE", """French InfoDrone WLAN beacon.""")
+MAV_ODID_RADIO_TECHNOLOGY_WLAN_FR_DSE = 5
+enums["MAV_ODID_RADIO_TECHNOLOGY"][5] = EnumEntry("MAV_ODID_RADIO_TECHNOLOGY_WLAN_FR_DSE", """French Direct Remote ID (DSE, "dispositif de signalement électronique") WLAN beacon.""")
 MAV_ODID_RADIO_TECHNOLOGY_BLE_GB46750 = 6
 enums["MAV_ODID_RADIO_TECHNOLOGY"][6] = EnumEntry("MAV_ODID_RADIO_TECHNOLOGY_BLE_GB46750", """Chinese GB 46750 Bluetooth.""")
 MAV_ODID_RADIO_TECHNOLOGY_WLAN_GB46750 = 7
@@ -360,13 +360,13 @@ class MAVLink_open_drone_id_radio_rx_information_message(MAVLink_message):
     Auxiliary information about the radio signal on which an
     OpenDroneID (or other Remote ID) message was received, e.g. RSSI.
     Sent alongside the corresponding OPEN_DRONE_ID_* message and
-    matched to it via id_or_mac, msg_id and odid_counter.
+    matched to it via id_or_mac and msg_crc.
     """
 
     id = MAVLINK_MSG_ID_OPEN_DRONE_ID_RADIO_RX_INFORMATION
     msgname = "OPEN_DRONE_ID_RADIO_RX_INFORMATION"
-    fieldnames = ["target_system", "target_component", "id_or_mac", "msg_id", "counter", "time_usec", "receiver_id", "radio_technology", "channel", "rssi", "brand", "model"]
-    ordered_fieldnames = ["time_usec", "msg_id", "target_system", "target_component", "id_or_mac", "counter", "receiver_id", "radio_technology", "channel", "rssi", "brand", "model"]
+    fieldnames = ["target_system", "target_component", "id_or_mac", "msg_crc", "counter", "time_usec", "receiver_id", "radio_technology", "channel", "rssi", "brand", "model"]
+    ordered_fieldnames = ["time_usec", "msg_crc", "target_system", "target_component", "id_or_mac", "counter", "receiver_id", "radio_technology", "channel", "rssi", "brand", "model"]
     fieldtypes = ["uint8_t", "uint8_t", "uint8_t", "uint32_t", "uint8_t", "uint64_t", "uint8_t", "uint8_t", "int8_t", "int8_t", "char", "char"]
     fielddisplays_by_name: Dict[str, str] = {}
     fieldenums_by_name: Dict[str, str] = {"radio_technology": "MAV_ODID_RADIO_TECHNOLOGY"}
@@ -375,12 +375,12 @@ class MAVLink_open_drone_id_radio_rx_information_message(MAVLink_message):
     orders = [2, 3, 4, 1, 5, 0, 6, 7, 8, 9, 10, 11]
     lengths = [1, 1, 1, 1, 20, 1, 1, 1, 1, 1, 1, 1]
     array_lengths = [0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 16, 16]
-    crc_extra = 124
+    crc_extra = 5
     unpacker = struct.Struct("<QIBB20BBBBbb16s16s")
     instance_field = None
     instance_offset = -1
 
-    def __init__(self, target_system: int, target_component: int, id_or_mac: Sequence[int], msg_id: int, counter: int, time_usec: int, receiver_id: int, radio_technology: int, channel: int, rssi: int, brand: bytes, model: bytes):
+    def __init__(self, target_system: int, target_component: int, id_or_mac: Sequence[int], msg_crc: int, counter: int, time_usec: int, receiver_id: int, radio_technology: int, channel: int, rssi: int, brand: bytes, model: bytes):
         MAVLink_message.__init__(self, MAVLink_open_drone_id_radio_rx_information_message.id, MAVLink_open_drone_id_radio_rx_information_message.msgname)
         self._fieldnames = MAVLink_open_drone_id_radio_rx_information_message.fieldnames
         self._instance_field = MAVLink_open_drone_id_radio_rx_information_message.instance_field
@@ -388,7 +388,7 @@ class MAVLink_open_drone_id_radio_rx_information_message(MAVLink_message):
         self.target_system = target_system
         self.target_component = target_component
         self.id_or_mac = id_or_mac
-        self.msg_id = msg_id
+        self.msg_crc = msg_crc
         self.counter = counter
         self.time_usec = time_usec
         self.receiver_id = receiver_id
@@ -401,7 +401,7 @@ class MAVLink_open_drone_id_radio_rx_information_message(MAVLink_message):
         self.model = model.split(b"\x00", 1)[0].decode("ascii", errors="replace")
 
     def pack(self, mav: "MAVLink", force_mavlink1: bool = False) -> bytes:
-        return self._pack(mav, self.crc_extra, self.unpacker.pack(self.time_usec, self.msg_id, self.target_system, self.target_component, self.id_or_mac[0], self.id_or_mac[1], self.id_or_mac[2], self.id_or_mac[3], self.id_or_mac[4], self.id_or_mac[5], self.id_or_mac[6], self.id_or_mac[7], self.id_or_mac[8], self.id_or_mac[9], self.id_or_mac[10], self.id_or_mac[11], self.id_or_mac[12], self.id_or_mac[13], self.id_or_mac[14], self.id_or_mac[15], self.id_or_mac[16], self.id_or_mac[17], self.id_or_mac[18], self.id_or_mac[19], self.counter, self.receiver_id, self.radio_technology, self.channel, self.rssi, self._brand_raw, self._model_raw), force_mavlink1=force_mavlink1)
+        return self._pack(mav, self.crc_extra, self.unpacker.pack(self.time_usec, self.msg_crc, self.target_system, self.target_component, self.id_or_mac[0], self.id_or_mac[1], self.id_or_mac[2], self.id_or_mac[3], self.id_or_mac[4], self.id_or_mac[5], self.id_or_mac[6], self.id_or_mac[7], self.id_or_mac[8], self.id_or_mac[9], self.id_or_mac[10], self.id_or_mac[11], self.id_or_mac[12], self.id_or_mac[13], self.id_or_mac[14], self.id_or_mac[15], self.id_or_mac[16], self.id_or_mac[17], self.id_or_mac[18], self.id_or_mac[19], self.counter, self.receiver_id, self.radio_technology, self.channel, self.rssi, self._brand_raw, self._model_raw), force_mavlink1=force_mavlink1)
 
 
 # Define name on the class for backwards compatibility (it is now msgname).
@@ -822,17 +822,17 @@ class MAVLink(object):
         m._header = MAVLink_header(msgId, incompat_flags, compat_flags, mlen, seq, srcSystem, srcComponent)
         return m
 
-    def open_drone_id_radio_rx_information_encode(self, target_system: int, target_component: int, id_or_mac: Sequence[int], msg_id: int, counter: int, time_usec: int, receiver_id: int, radio_technology: int, channel: int, rssi: int, brand: bytes, model: bytes) -> MAVLink_open_drone_id_radio_rx_information_message:
+    def open_drone_id_radio_rx_information_encode(self, target_system: int, target_component: int, id_or_mac: Sequence[int], msg_crc: int, counter: int, time_usec: int, receiver_id: int, radio_technology: int, channel: int, rssi: int, brand: bytes, model: bytes) -> MAVLink_open_drone_id_radio_rx_information_message:
         """
         Auxiliary information about the radio signal on which an OpenDroneID
         (or other Remote ID) message was received, e.g. RSSI. Sent
         alongside the corresponding OPEN_DRONE_ID_* message and
-        matched to it via id_or_mac, msg_id and odid_counter.
+        matched to it via id_or_mac and msg_crc.
 
         target_system             : System ID (0 for broadcast). (type:uint8_t)
         target_component          : Component ID (0 for broadcast). (type:uint8_t)
         id_or_mac                 : MAC address or UAS ID of the transmitter, identical to id_or_mac in the associated OPEN_DRONE_ID_* message. See https://mavlink.io/en/services/opendroneid.html. (type:uint8_t)
-        msg_id                    : MAVLink message ID of the associated OPEN_DRONE_ID_* message this reception information belongs to (e.g. 12901 for OPEN_DRONE_ID_LOCATION, 12915 for OPEN_DRONE_ID_MESSAGE_PACK). 0 if there is no corresponding MAVLink message. (type:uint32_t)
+        msg_crc                   : CRC-32 (IEEE 802.3, as computed by zlib crc32()) of the OpenDroneID messages in the associated OPEN_DRONE_ID_MESSAGE_PACK this reception information belongs to: messages[0 .. msg_pack_size * single_message_size). Only OPEN_DRONE_ID_MESSAGE_PACK is supported as associated message. (type:uint32_t)
         counter                   : Message counter, copied from the received radio frame (the counter byte) Undefined for radio technologies that do not carry an ODID message counter. (type:uint8_t)
         time_usec                 : Timestamp of reception (UNIX epoch or time since boot). 0 if unknown. [us] (type:uint64_t)
         receiver_id               : Index of the receiver/antenna on this component that received the signal, for components with multiple receivers. 0 if there is only one receiver or the index is unknown. (type:uint8_t)
@@ -843,19 +843,19 @@ class MAVLink(object):
         model                     : Model of the transmitting RID device, if known. Not NUL-terminated if exactly 16 chars. Empty if unknown. (type:char)
 
         """
-        return MAVLink_open_drone_id_radio_rx_information_message(target_system, target_component, id_or_mac, msg_id, counter, time_usec, receiver_id, radio_technology, channel, rssi, brand, model)
+        return MAVLink_open_drone_id_radio_rx_information_message(target_system, target_component, id_or_mac, msg_crc, counter, time_usec, receiver_id, radio_technology, channel, rssi, brand, model)
 
-    def open_drone_id_radio_rx_information_send(self, target_system: int, target_component: int, id_or_mac: Sequence[int], msg_id: int, counter: int, time_usec: int, receiver_id: int, radio_technology: int, channel: int, rssi: int, brand: bytes, model: bytes, force_mavlink1: bool = False) -> None:
+    def open_drone_id_radio_rx_information_send(self, target_system: int, target_component: int, id_or_mac: Sequence[int], msg_crc: int, counter: int, time_usec: int, receiver_id: int, radio_technology: int, channel: int, rssi: int, brand: bytes, model: bytes, force_mavlink1: bool = False) -> None:
         """
         Auxiliary information about the radio signal on which an OpenDroneID
         (or other Remote ID) message was received, e.g. RSSI. Sent
         alongside the corresponding OPEN_DRONE_ID_* message and
-        matched to it via id_or_mac, msg_id and odid_counter.
+        matched to it via id_or_mac and msg_crc.
 
         target_system             : System ID (0 for broadcast). (type:uint8_t)
         target_component          : Component ID (0 for broadcast). (type:uint8_t)
         id_or_mac                 : MAC address or UAS ID of the transmitter, identical to id_or_mac in the associated OPEN_DRONE_ID_* message. See https://mavlink.io/en/services/opendroneid.html. (type:uint8_t)
-        msg_id                    : MAVLink message ID of the associated OPEN_DRONE_ID_* message this reception information belongs to (e.g. 12901 for OPEN_DRONE_ID_LOCATION, 12915 for OPEN_DRONE_ID_MESSAGE_PACK). 0 if there is no corresponding MAVLink message. (type:uint32_t)
+        msg_crc                   : CRC-32 (IEEE 802.3, as computed by zlib crc32()) of the OpenDroneID messages in the associated OPEN_DRONE_ID_MESSAGE_PACK this reception information belongs to: messages[0 .. msg_pack_size * single_message_size). Only OPEN_DRONE_ID_MESSAGE_PACK is supported as associated message. (type:uint32_t)
         counter                   : Message counter, copied from the received radio frame (the counter byte) Undefined for radio technologies that do not carry an ODID message counter. (type:uint8_t)
         time_usec                 : Timestamp of reception (UNIX epoch or time since boot). 0 if unknown. [us] (type:uint64_t)
         receiver_id               : Index of the receiver/antenna on this component that received the signal, for components with multiple receivers. 0 if there is only one receiver or the index is unknown. (type:uint8_t)
@@ -866,4 +866,4 @@ class MAVLink(object):
         model                     : Model of the transmitting RID device, if known. Not NUL-terminated if exactly 16 chars. Empty if unknown. (type:char)
 
         """
-        self.send(self.open_drone_id_radio_rx_information_encode(target_system, target_component, id_or_mac, msg_id, counter, time_usec, receiver_id, radio_technology, channel, rssi, brand, model), force_mavlink1=force_mavlink1)
+        self.send(self.open_drone_id_radio_rx_information_encode(target_system, target_component, id_or_mac, msg_crc, counter, time_usec, receiver_id, radio_technology, channel, rssi, brand, model), force_mavlink1=force_mavlink1)

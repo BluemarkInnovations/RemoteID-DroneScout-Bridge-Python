@@ -6,6 +6,7 @@ import os
 os.environ['MAVLINK20'] = '1'   # use the MAVLink 2 dialects; must be before importing mavutil
 
 import time
+import zlib
 from pymavlink import mavutil
 import threading
 
@@ -58,9 +59,13 @@ error_filename = None       # CSV log file for decode errors, created when the f
 bad_bytes = bytearray()     # consecutive bytes that are not part of a MAVLink packet
 mav_loss = 0                # packets lost so far according to the MAVLink sequence numbers
 
+def pack_crc(pack):
+    # CRC-32 of the OpenDroneID messages in a message pack, as in msg_crc of the RX information
+    return zlib.crc32(bytes(pack.messages[:pack.msg_pack_size * pack.single_message_size]))
+
 def rx_matches(rx, pack):
-    # RX information refers to the MAVLink message it belongs to by message ID
-    return rx.msg_id == pack.get_msgId()
+    # RX information refers to the message pack it belongs to by the CRC of its messages
+    return rx.msg_crc == pack_crc(pack)
 
 def log_pack(pack, rx):
     # write a message pack, with its RX information if available, to the CSV file

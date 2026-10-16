@@ -5,6 +5,7 @@ import runpy
 import tempfile
 import time
 import unittest
+import zlib
 
 from pymavlink import mavutil
 
@@ -41,9 +42,14 @@ def pack_msg(n, serial):
     payload, size = builder.pack(builder.basic_id(serial))
     return mavutil.mavlink.MAVLink_open_drone_id_message_pack_message(0, 0, mac(n), 25, size, payload)
 
-def rx_msg(n, rssi):
+def crc(pack):
+    # msg_crc of the RX information that belongs to the message pack
+    return zlib.crc32(bytes(pack.messages[:pack.msg_pack_size * 25]))
+
+def rx_msg(n, rssi, pack):
+    # RX information that belongs to the message pack
     return rid.MAVLink_open_drone_id_radio_rx_information_message(
-        0, 0, mac(n), mavutil.mavlink.MAVLINK_MSG_ID_OPEN_DRONE_ID_MESSAGE_PACK, 1, 0, 7, 1, 37, rssi, b'b', b'm')
+        0, 0, mac(n), crc(pack), 1, 0, 7, 1, 37, rssi, b'b', b'm')
 
 def encode(msg, seq):
     # returns the bytes of a MAVLink packet as sent by the bridge
@@ -137,14 +143,30 @@ class TestMainLoop(unittest.TestCase):
         self.assertEqual(glob.glob(os.path.join(self.tmp.name, '*_remoteID_log.csv')), [])
 
     def test_rx_information_matched_in_any_order(self):
-        rows = self.run_main([rx_msg(1, -40), pack_msg(1, b'RXFIRST'),
-                              pack_msg(2, b'PACKFIRST'), rx_msg(2, -50),
+        first, second = pack_msg(1, b'RXFIRST'), pack_msg(2, b'PACKFIRST')
+        rows = self.run_main([rx_msg(1, -40, first), first,
+                              second, rx_msg(2, -50, second),
                               pack_msg(3, b'NORX'), 'wait'])
         self.assertEqual([(r['BasicID'], r['RSSI']) for r in rows],
                          [('RXFIRST', '-40'), ('PACKFIRST', '-50'), ('NORX', '')])
 
+    def test_rx_information_of_other_message_is_not_used(self):
+        # same transmitter, but the RX information belongs to a different message pack
+        rows = self.run_main([rx_msg(1, -40, pack_msg(1, b'OTHER')), pack_msg(1, b'SN1'),
+                              pack_msg(2, b'SN2'), rx_msg(2, -50, pack_msg(2, b'OTHER')), 'wait'])
+        self.assertEqual([(r['BasicID'], r['RSSI']) for r in rows], [('SN1', ''), ('SN2', '')])
+
+    def test_rx_information_matched_after_mavlink_decode(self):
+        # the CRC must also match for packs that are decoded from a (truncated MAVLink 2) byte stream
+        pack = pack_msg(1, b'SN1')
+        mav = mavutil.mavlink.MAVLink(None)
+        decoded = mav.decode(bytearray(encode(pack, 0)))
+        rows = self.run_main([rx_msg(1, -40, pack), decoded, 'wait'])
+        self.assertEqual([(r['BasicID'], r['RSSI']) for r in rows], [('SN1', '-40')])
+
     def test_old_rx_information_is_not_used(self):
-        rows = self.run_main([rx_msg(1, -40), 'wait', pack_msg(1, b'SN1'), 'wait'])
+        pack = pack_msg(1, b'SN1')
+        rows = self.run_main([rx_msg(1, -40, pack), 'wait', pack, 'wait'])
         self.assertEqual([(r['BasicID'], r['RSSI']) for r in rows], [('SN1', '')])
 
     def test_read_error_does_not_repeat_previous_message(self):

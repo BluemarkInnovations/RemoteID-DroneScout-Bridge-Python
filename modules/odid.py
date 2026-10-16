@@ -20,7 +20,6 @@ def print_rx_information(msg):
 
     rssi = "unknown" if msg.rssi == 127 else "%d dBm" % msg.rssi
     channel = "unknown" if msg.channel == 0 else "%u" % msg.channel
-    msg_id = "none" if msg.msg_id == 0 else "%u" % msg.msg_id
     time_usec = "unknown" if msg.time_usec == 0 else "%u us" % msg.time_usec
 
     print("ID/MAC:\t\t\t%s" % id_or_mac)
@@ -28,7 +27,7 @@ def print_rx_information(msg):
     print("Channel:\t\t%s" % channel)
     print("RSSI:\t\t\t%s" % rssi)
     print("Counter:\t\t%u" % msg.counter)
-    print("Related MAVLink msg ID:\t%s" % msg_id)
+    print("Related msg CRC:\t0x%08X" % msg.msg_crc)
     print("Receiver ID:\t\t%u" % msg.receiver_id)
     print("Timestamp:\t\t%s" % time_usec)
     print("Brand:\t\t\t%s" % (msg.brand if msg.brand else "unknown"))

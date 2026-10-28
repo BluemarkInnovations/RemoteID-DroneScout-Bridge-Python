@@ -1,4 +1,6 @@
+import io
 import unittest
+from contextlib import redirect_stdout
 
 from modules import sbs
 from tests import builder
@@ -6,8 +8,17 @@ from tests import builder
 class FakeConnection:
     def __init__(self):
         self.data = b''
+        self.closed = False
     def sendall(self, data):
         self.data += data
+    def setsockopt(self, *args):
+        pass
+    def close(self):
+        self.closed = True
+
+class BrokenConnection(FakeConnection):
+    def sendall(self, data):
+        raise ConnectionResetError("connection reset by peer")
 
 class TestSBS(unittest.TestCase):
     def setUp(self):
@@ -15,7 +26,7 @@ class TestSBS(unittest.TestCase):
         sbs.sbs_connection = self.connection
 
     def tearDown(self):
-        del sbs.sbs_connection
+        sbs.sbs_connection = None
 
     def lines(self):
         return [line.split(',') for line in self.connection.data.decode('ascii').splitlines()]
@@ -46,3 +57,18 @@ class TestSBS(unittest.TestCase):
         payload, size = builder.pack(builder.basic_id(b'\xc3\xa9AB', id_type=4))
         sbs.export(payload, size)
         self.assertEqual(self.connection.data, b'')
+
+    def test_disconnected_client_is_dropped(self):
+        broken = BrokenConnection()
+        sbs.sbs_connection = broken
+        payload, size = builder.pack(builder.basic_id(b'SN1'), builder.location(52.1, 4.2))
+        with redirect_stdout(io.StringIO()):
+            sbs.export(payload, size)
+        self.assertTrue(broken.closed)
+        self.assertIsNone(sbs.sbs_connection)
+        sbs.export(payload, size) # no client: nothing is sent and nothing fails
+
+    def test_no_client(self):
+        sbs.sbs_connection = None
+        payload, size = builder.pack(builder.basic_id(b'SN1'), builder.location(52.1, 4.2))
+        sbs.export(payload, size)

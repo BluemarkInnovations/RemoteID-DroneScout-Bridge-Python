@@ -5,6 +5,8 @@ import config
 
 from modules import odid # opendroneID functions
 
+sbs_connection = None # connected SBS client, None if there is none
+
 def connect():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -13,8 +15,11 @@ def connect():
         s.listen()
         while True:
             global sbs_connection
-            sbs_connection, addr = s.accept()
+            connection, addr = s.accept()
             print("Accepted")
+            previous, sbs_connection = sbs_connection, connection
+            if previous is not None: # only one client is supported; the newest one wins
+                close(previous)
 
 def ICAO(data):
     ICAO = "FF" # start with FF to indicate an invalid ICAO 24-digit code
@@ -44,24 +49,31 @@ def rounded(value):
     # unknown values (NaN) are left empty
     return '' if math.isnan(value) else str(round(value))
 
-def transmit(data):
+def close(connection):
+    # reset the connection instead of a graceful close, the client may already be gone
     try:
-        sbs_connection.sendall(bytes(data,"ascii"))
+        connection.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, struct.pack('ii', 1, 0))
+    except OSError:
+        pass
+    connection.close()
 
-    except (OSError, socket.error) as e:
+def transmit(data):
+    global sbs_connection
+    connection = sbs_connection
+    if connection is None: # client disconnected, wait for a new one
+        return
+    try:
+        connection.sendall(bytes(data,"ascii"))
+
+    except OSError as e:
         print("Error:", e)
-        # reset connection
-        sbs_connection.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, struct.pack('ii', 1, 0))
-        sbs_connection.close()
-    return
+        close(connection)
+        if sbs_connection is connection: # don't drop a new client accepted in the meantime
+            sbs_connection = None
 
 def export(payload, size):
 
-    try:
-        sbs_connection
-    except NameError:
-        pass
-    else:
+    if sbs_connection is not None:
         Emergency_flag = 0
         Is_on_ground_flag = 1
 

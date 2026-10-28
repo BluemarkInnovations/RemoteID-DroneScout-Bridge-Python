@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<mavlink>
+  <enums>
+    <enum name="MAV_ODID_RADIO_TECHNOLOGY">
+      <description>Radio technology over which a Remote ID message was received.</description>
+      <entry value="0" name="MAV_ODID_RADIO_TECHNOLOGY_UNKNOWN">
+        <description>Unknown or not reported.</description>
+      </entry>
+      <entry value="1" name="MAV_ODID_RADIO_TECHNOLOGY_BLE_LEGACY">
+        <description>OpenDroneID Bluetooth Legacy (BT4 advertising).</description>
+      </entry>
+      <entry value="2" name="MAV_ODID_RADIO_TECHNOLOGY_BLE_LR">
+        <description>OpenDroneID Bluetooth Long Range (BT5 Coded PHY).</description>
+      </entry>
+      <entry value="3" name="MAV_ODID_RADIO_TECHNOLOGY_WLAN_BEACON">
+        <description>OpenDroneID WLAN Beacon.</description>
+      </entry>
+      <entry value="4" name="MAV_ODID_RADIO_TECHNOLOGY_WLAN_NAN">
+        <description>OpenDroneID WLAN NAN.</description>
+      </entry>
+      <entry value="5" name="MAV_ODID_RADIO_TECHNOLOGY_WLAN_FR_DSE">
+        <description>French Direct Remote ID (DSE, "dispositif de signalement électronique") WLAN beacon.</description>
+      </entry>
+      <entry value="6" name="MAV_ODID_RADIO_TECHNOLOGY_BLE_GB46750">
+        <description>Chinese GB 46750 Bluetooth.</description>
+      </entry>
+      <entry value="7" name="MAV_ODID_RADIO_TECHNOLOGY_WLAN_GB46750">
+        <description>Chinese GB 46750 WLAN Beacon.</description>
+      </entry>
+    </enum>
+  </enums>
+  <messages>
+    <message id="12914" name="OPEN_DRONE_ID_RADIO_RX_INFORMATION">
+      <wip/>
+      <!-- This message is work-in-progress and it can therefore change, and should NOT be used in stable production environments -->
+      <description>Auxiliary information about the radio signal on which an OpenDroneID (or other Remote ID) message was received, e.g. RSSI. Sent alongside the corresponding OPEN_DRONE_ID_* message and matched to it via id_or_mac and msg_crc.</description>
+      <field type="uint8_t" name="target_system">System ID (0 for broadcast).</field>
+      <field type="uint8_t" name="target_component">Component ID (0 for broadcast).</field>
+      <field type="uint8_t[20]" name="id_or_mac">MAC address or UAS ID of the transmitter, identical to id_or_mac in the associated OPEN_DRONE_ID_* message. See https://mavlink.io/en/services/opendroneid.html.</field>
+      <field type="uint32_t" name="msg_crc">CRC-32 (IEEE 802.3, as computed by zlib crc32()) of the OpenDroneID messages in the associated OPEN_DRONE_ID_MESSAGE_PACK this reception information belongs to: messages[0 .. msg_pack_size * single_message_size). Only OPEN_DRONE_ID_MESSAGE_PACK is supported as associated message.</field>
+      <field type="uint8_t" name="counter">Message counter, copied from the received radio frame (the counter byte) Undefined for radio technologies that do not carry an ODID message counter.</field>
+      <field type="uint64_t" name="time_usec" units="us">Timestamp of reception (UNIX epoch or time since boot). 0 if unknown.</field>
+      <field type="uint8_t" name="receiver_id">Index of the receiver/antenna on this component that received the signal, for components with multiple receivers. 0 if there is only one receiver or the index is unknown.</field>
+      <field type="uint8_t" name="radio_technology" enum="MAV_ODID_RADIO_TECHNOLOGY">Radio technology over which the message was received.</field>
+      <field type="int8_t" name="channel" invalid="0">WLAN channel of the received signal. 0 if unknown.</field>
+      <field type="int8_t" name="rssi" units="dBm" invalid="INT8_MAX">RSSI of the received signal. INT8_MAX if unknown.</field>
+      <field type="char[16]" name="brand">Brand/manufacturer of the transmitting RID device, if known. Not NUL-terminated if exactly 16 chars. Empty if unknown.</field>
+      <field type="char[16]" name="model">Model of the transmitting RID device, if known. Not NUL-terminated if exactly 16 chars. Empty if unknown.</field>
+    </message>
+  </messages>
+</mavlink>

@@ -68,6 +68,24 @@ class TestSystem(unittest.TestCase):
         self.assertEqual(out['UA class'], 'Class 1')
         self.assertEqual(out['Timestamp'], '2019-01-02 00:00:00 UTC')
 
+class TestAuth(unittest.TestCase):
+    def test_first_page(self):
+        msg = builder.auth(b'\x01\x02\xab', auth_type=2, last_page_index=1, length=40, timestamp=86400)
+        out = builder.printed(odid.print_auth, list(msg))
+        self.assertEqual(out['Auth Type'], 'Operator ID Signature')
+        self.assertEqual(out['Page Number'], '0')
+        self.assertEqual(out['Last Page Index'], '1')
+        self.assertEqual(out['Length'], '40')
+        self.assertEqual(out['Timestamp'], '2019-01-02 00:00:00 UTC')
+        self.assertEqual(out['Auth Data'], '01 02 ab' + ' 00' * 14)
+
+    def test_next_page(self):
+        out = builder.printed(odid.print_auth, list(builder.auth(b'\xff', auth_type=0xA, page=1)))
+        self.assertEqual(out['Auth Type'], 'Private Use')
+        self.assertEqual(out['Page Number'], '1')
+        self.assertNotIn('Length', out)
+        self.assertEqual(out['Auth Data'], 'ff' + ' 00' * 22)
+
 class TestTextMessages(unittest.TestCase):
     def test_self_id(self):
         out = builder.printed(odid.print_selfID, list(builder.self_id(b'survey\tflight\xff')))

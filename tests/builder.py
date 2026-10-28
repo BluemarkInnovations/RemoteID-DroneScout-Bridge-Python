@@ -17,6 +17,12 @@ def location(lat, lon, alt_baro=0.0, alt_geo=0.0, height=0.0, direction=0, speed
                        int(round(lat*1e7)), int(round(lon*1e7)), encode_altitude(alt_baro),
                        encode_altitude(alt_geo), encode_altitude(height), 0, 0, timestamp, 0) + bytes(1)
 
+def auth(data, auth_type=1, page=0, last_page_index=0, length=None, timestamp=0):
+    if page == 0:
+        length = len(data) if length is None else length
+        return struct.pack('<BBBBI', 0x22, (auth_type << 4) | page, last_page_index, length, timestamp) + data.ljust(17, b'\0')
+    return bytes([0x22, (auth_type << 4) | page]) + data.ljust(23, b'\0')
+
 def self_id(text, desc_type=0):
     return bytes([0x32, desc_type]) + text.ljust(23, b'\0')
 

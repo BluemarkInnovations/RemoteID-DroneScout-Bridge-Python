@@ -100,6 +100,22 @@ def decode_location(payload):
         'ts_accuracy': payload[23] & 0x0F,
     }
 
+def decode_auth(payload):
+    data = bytes(payload)
+    page = payload[1] & 0x0F
+    msg = {
+        'type': payload[1] >> 4,
+        'page': page,
+    }
+    if page == 0: # the first page also holds the page count, the total data length and a timestamp
+        last_page_index, length, timestamp = struct.unpack('<BBI', data[2:8])
+        msg.update({'last_page_index': last_page_index, 'length': length,
+                    'timestamp': timestamp, # seconds since 01/01/2019
+                    'data': data[8:25]})
+    else:
+        msg['data'] = data[2:25]
+    return msg
+
 def decode_selfID(payload):
     return {
         'type': payload[1],
@@ -134,6 +150,7 @@ def decode_operatorID(payload):
 DECODERS = {
     ODID_MESSAGETYPE.ODID_MESSAGETYPE_BASIC_ID: decode_basicID,
     ODID_MESSAGETYPE.ODID_MESSAGETYPE_LOCATION: decode_location,
+    ODID_MESSAGETYPE.ODID_MESSAGETYPE_AUTH: decode_auth,
     ODID_MESSAGETYPE.ODID_MESSAGETYPE_SELF_ID: decode_selfID,
     ODID_MESSAGETYPE.ODID_MESSAGETYPE_SYSTEM: decode_system,
     ODID_MESSAGETYPE.ODID_MESSAGETYPE_OPERATOR_ID: decode_operatorID,
@@ -175,8 +192,14 @@ def print_location(payload):
     print("Timestamp Accuracy: %i" % msg['ts_accuracy'])
 
 def print_auth(payload):
-    #todo
-    print("todo")
+    msg = decode_auth(payload)
+    print("Auth Type: %s" % decode_auth_type(msg['type']))
+    print("Page Number: %i" % msg['page'])
+    if msg['page'] == 0:
+        print("Last Page Index: %i" % msg['last_page_index'])
+        print("Length: %i" % msg['length'])
+        print("Timestamp: %s" % decode_system_timestamp(msg['timestamp']))
+    print("Auth Data: %s" % msg['data'].hex(' ')) # binary data, e.g. a signature
 
 def print_selfID(payload):
     msg = decode_selfID(payload)
@@ -287,6 +310,20 @@ LOCATION_HEIGHT_TYPE = {
 
 def decode_location_height_type(height_type):
     return LOCATION_HEIGHT_TYPE.get(height_type, "")
+
+AUTH_TYPE = {
+    0: "None",
+    1: "UAS ID Signature",
+    2: "Operator ID Signature",
+    3: "Message Set Signature",
+    4: "Network Remote ID",
+    5: "Specific Authentication Method",
+}
+
+def decode_auth_type(auth_type):
+    if 0xA <= auth_type <= 0xF:
+        return "Private Use"
+    return AUTH_TYPE.get(auth_type, "")
 
 SELFID_TYPE = {
     0: "Text",
